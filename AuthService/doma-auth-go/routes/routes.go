@@ -9,17 +9,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// RegisterRoutes sets up the routes for the application.
+// RegisterRoutes sets up the HTTP routes.
 func RegisterRoutes() *mux.Router {
 	r := mux.NewRouter()
-	authRouter := r.PathPrefix("/auth").Subrouter()
-	authRouter.HandleFunc("/register", handlers.Register).Methods("POST")
-	authRouter.HandleFunc("/login", handlers.Login).Methods("POST")
-	
-	// You can add more routes here.
+
+	// Registration endpoint
+	r.HandleFunc("/auth/register", handlers.Register).Methods("POST")
+
+	// Login endpoint
+	r.HandleFunc("/auth/login", handlers.Login).Methods("POST")
+
+	// Optional: a simple test endpoint
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Welcome to DOMA Auth Service"))
-	})
-	
+		w.Write([]byte("Auth Service is running!"))
+	}).Methods("GET")
+
 	return r
 }

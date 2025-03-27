@@ -12,27 +12,27 @@ import (
 
 var DB *sql.DB
 
-// Init initializes the database connection.
+// Init connects to PostgreSQL using settings from environment variables.
 func Init() {
-	// Retrieve configuration from environment variables or hardcode for now.
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbName := os.Getenv("DB_DATABASE")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")	
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	name := os.Getenv("DB_NAME")
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
 
+	// Important: disable SSL if not needed.
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		dbHost, dbPort, dbUser, dbPassword, dbName)
+		host, port, user, password, name)
 
 	var err error
 	DB, err = sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal("Error opening database:", err)
+		log.Fatalf("Failed to open DB: %v", err)
 	}
 
 	if err = DB.Ping(); err != nil {
-		log.Fatal("Error connecting to the database:", err)
+		log.Fatalf("Failed to connect to DB: %v", err)
 	}
 
-	log.Println("Connected to the database!")
+	log.Println("Auth DB connected successfully!")
 }

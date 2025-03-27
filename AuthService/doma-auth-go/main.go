@@ -28,19 +28,19 @@ func main() {
 
 	// Wrap router with CORS middleware.
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"}, // Allow requests from your frontend domain.
+		AllowedOrigins:   []string{"http://localhost:3000"}, // Allow requests from your frontend
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
 	})
 	handler := c.Handler(router)
 
-	// Determine the port from environment or default to 4000.
+	// Determine port from environment or default to 4000.
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "4000"
 	}
 
-	log.Printf("Server running on port %s", port)
+	log.Printf("Auth service running on port %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, handler))
 }
