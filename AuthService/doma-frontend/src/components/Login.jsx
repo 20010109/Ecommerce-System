@@ -1,6 +1,7 @@
 // src/components/Login.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { login } from "../services/authService";
 // import './Login.css'; // Your styling for the login page
 
 const Login = () => {
@@ -11,23 +12,12 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:4000/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        // Save token if needed
-        localStorage.setItem('authToken', data.token);
-        // Redirect to dashboard
-        navigate('/dashboard');
-      } else {
-        alert(data.message || 'Login failed');
-      }
+      const data = await login(username, password);
+      localStorage.setItem("authToken", data.token);
+      // After login, redirect to the dashboard (which links to the catalog)
+      navigate("/dashboard");
     } catch (error) {
-      console.error(error);
-      alert('Error logging in');
+      alert(error.message);
     }
   };
 
