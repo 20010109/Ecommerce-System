@@ -38,12 +38,12 @@ func main() {
 	// Set up CORS using Gorilla's handlers package.
 	allowedOrigins := cors.AllowedOrigins([]string{"http://localhost:3000"})
 	allowedMethods := cors.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
-	allowedHeaders := cors.AllowedHeaders([]string{"Content-Type"})
+	allowedHeaders := cors.AllowedHeaders([]string{"Content-Type", "Authorization"})
 
 	// Get the port from the environment.
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8081"
+		port = "4002"
 	}
 	fmt.Printf("ProductService REST API running on port %s\n", port)
 
