@@ -10,7 +10,7 @@ import ProductDetail from "./components/ProductDetail";
 function App() {
   return (
     <Router>
-      <Header />
+      <Header/>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />

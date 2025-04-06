@@ -1,0 +1,20 @@
+:root {
+    --color-bg: #F8EDED;       /* Pale pink background */
+    --color-accent: #FF8225;   /* Orange accent */
+    --color-primary: #B43F3F;  /* Red accent */
+    --color-secondary: #173B45;/* Dark teal text */
+}
+
+.header{
+    background-color: var(--color-accent);
+    height: 100px;
+    align-items: start;
+    margin: 0;
+    align-content: center;
+}
+
+.header-div h1{
+    margin: 0;
+    text-align: center;
+    color: white;
+}

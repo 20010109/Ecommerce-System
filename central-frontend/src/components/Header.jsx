@@ -1,17 +1,11 @@
 import React from "react";
+import "./style/Header.css"
 
 function Header() {
   return (
-    <header
-      style={{
-        backgroundColor: "var(--color-primary)",
-        color: "#fff",
-        padding: "1rem 0",
-        textAlign: "center",
-      }}
-    >
-      <div className="container">
-        <h1 style={{ margin: 0 }}>DOMA</h1>
+    <header className="header">
+      <div className="header-div">
+        <h1>DOMA</h1>
       </div>
     </header>
   );

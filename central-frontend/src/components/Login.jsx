@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../services/authService";
-// import "./Login.css"; // optional custom styles
+import "./style/Login.css"; // optional custom styles
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -22,8 +22,8 @@ function Login() {
 
   return (
     <div className="auth-container">
-      <h1>DOMA</h1>
-      <h2>Login</h2>
+      <h1 className="Title.text">DOMA</h1>
+      <h2 className="Login.text">Login</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"

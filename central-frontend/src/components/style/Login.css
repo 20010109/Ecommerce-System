@@ -1,0 +1,19 @@
+
+:root {
+    --color-bg: #F8EDED;       /* Pale pink background */
+    --color-accent: #FF8225;   /* Orange accent */
+    --color-primary: #B43F3F;  /* Red accent */
+    --color-secondary: #173B45;/* Dark teal text */
+}
+  
+.auth-container{
+    text-align: center;
+    padding: 60px;
+}
+
+input{
+    height: 50px;
+    width: 300px;
+    padding: 0;
+}
+  
