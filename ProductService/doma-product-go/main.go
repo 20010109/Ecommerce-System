@@ -1,52 +1,60 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
-	"os"
+    "fmt"
+    "log"
+    "net/http"
+    "os"
 
-	"doma-product-go/db"
-	customHandlers "doma-product-go/handlers"
+    "doma-product-go/handlers"
 
-	"github.com/gorilla/mux"
-	cors "github.com/gorilla/handlers"
-	"github.com/joho/godotenv"
+    "github.com/gorilla/mux"
+    "github.com/joho/godotenv"
 )
 
+func enableCORS(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Access-Control-Allow-Origin", "*")
+        w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+        if r.Method == http.MethodOptions {
+            w.WriteHeader(http.StatusOK)
+            return
+        }
+
+        next.ServeHTTP(w, r)
+    })
+}
+
 func main() {
-	// Load environment variables from .env file.
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Warning: .env file not found; using environment variables.")
-	}
+    // Load environment variables
+    if err := godotenv.Load(); err != nil {
+        log.Println("Warning: .env file not found; using environment variables.")
+    }
 
-	// Initialize the database connection.
-	if err := db.InitDB(); err != nil {
-		log.Fatalf("Failed to connect to DB: %v", err)
-	}
+    // Initialize the Supabase client
+    handlers.InitDB()
 
-	// Create a new router.
-	r := mux.NewRouter()
+    // Create a new router
+    router := mux.NewRouter()
 
-	// Define REST endpoints.
-	r.HandleFunc("/products", customHandlers.GetProducts).Methods("GET")
-	r.HandleFunc("/products/{id}", customHandlers.GetProduct).Methods("GET")
-	r.HandleFunc("/products", customHandlers.CreateProduct).Methods("POST")
-	r.HandleFunc("/products/{id}/variants", customHandlers.CreateProductVariant).Methods("POST")
+    // Define REST endpoints
+    router.HandleFunc("/getproducts", handlers.GetProducts).Methods("GET")
+    router.HandleFunc("/getproducts/{id}", handlers.GetProduct).Methods("GET")
+	router.HandleFunc("/getproducts/{id}/variants", handlers.GetProductVariants).Methods("GET")
+	router.HandleFunc("/getproducts/{id}/variants/{variant_id}", handlers.GetProductVariant).Methods("GET")
 
-	// Set up CORS using Gorilla's handlers package.
-	allowedOrigins := cors.AllowedOrigins([]string{"http://localhost:3000"})
-	allowedMethods := cors.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
-	allowedHeaders := cors.AllowedHeaders([]string{"Content-Type", "Authorization"})
+    // Wrap the router with the CORS middleware
+    handlerWithCORS := enableCORS(router)
 
-	// Get the port from the environment.
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "4002"
-	}
-	fmt.Printf("ProductService REST API running on port %s\n", port)
+    // Get the port from the environment or use the default
+    port := os.Getenv("PORT")
+    if port == "" {
+        port = "8001"
+    }
+    fmt.Printf("ProductService REST API running on port %s\n", port)
 
-	// Wrap the router with CORS middleware.
-	log.Fatal(http.ListenAndServe(":"+port, cors.CORS(allowedOrigins, allowedMethods, allowedHeaders)(r)))
+    // Start the server
+    log.Fatal(http.ListenAndServe(":"+port, handlerWithCORS))
 }

@@ -1,25 +1,22 @@
-const AUTH_URL = process.env.REACT_APP_AUTH_URL || "http://localhost:4000/auth";
+import axios from "axios";
 
-export async function login(username, password) {
-  const response = await fetch(`${AUTH_URL}/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
-  if (!response.ok) {
-    throw new Error("Login failed");
+// Set the base URL for all axios requests
+const API = axios.create({
+  baseURL: "http://localhost:8000", // Replace with your backend URL
+});
+
+export async function register(email, password) {
+  const response = await API.post("/register", { email, password });
+  if (response.status !== 200) {
+    throw new Error(response.data.message || "Registration failed");
   }
-  return await response.json(); // Expected to return { token: "..." }
+  return response.data; // Return any relevant data from the backend
 }
 
-export async function register(username, email, password) {
-  const response = await fetch(`${AUTH_URL}/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, email, password }),
-  });
-  if (!response.ok) {
-    throw new Error("Registration failed");
+export async function login(email, password) {
+  const response = await API.post("/login", { email, password });
+  if (response.status !== 200) {
+    throw new Error(response.data.message || "Login failed");
   }
-  return await response.json();
+  return response.data; // Return user data or token
 }

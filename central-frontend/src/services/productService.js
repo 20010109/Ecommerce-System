@@ -1,23 +1,35 @@
-const PRODUCT_URL = process.env.REACT_APP_PRODUCT_URL || "http://localhost:4002";
+const PRODUCT_URL = process.env.REACT_APP_PRODUCT_URL || "http://localhost:8001";
 
-export async function fetchProducts() {
+const getAuthHeaders = () => {
   const token = localStorage.getItem("authToken") || "";
-  const response = await fetch(`${PRODUCT_URL}/products`, {
-    headers: { Authorization: token },
-  });
+  return { Authorization: token };
+};
+
+const handleResponse = async (response) => {
   if (!response.ok) {
-    throw new Error("Failed to fetch products");
+    const errorMessage = await response.text();
+    throw new Error(errorMessage || "Failed to fetch data");
   }
   return await response.json();
+};
+
+export async function fetchProducts() {
+  const response = await fetch(`${PRODUCT_URL}/getproducts`, {
+    headers: getAuthHeaders(),
+  });
+  return handleResponse(response);
 }
 
 export async function fetchProductById(id) {
-  const token = localStorage.getItem("authToken") || "";
-  const response = await fetch(`${PRODUCT_URL}/products/${id}`, {
-    headers: { Authorization: token },
+  const response = await fetch(`${PRODUCT_URL}/getproducts/${id}`, {
+    headers: getAuthHeaders(),
   });
-  if (!response.ok) {
-    throw new Error("Failed to fetch product");
-  }
-  return await response.json();
+  return handleResponse(response);
+}
+
+export async function fetchProductVariantsById(id) {
+  const response = await fetch(`${PRODUCT_URL}/getproducts/${id}/variants`, {
+    headers: getAuthHeaders(),
+  });
+  return handleResponse(response);
 }

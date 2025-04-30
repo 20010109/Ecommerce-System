@@ -1,47 +1,75 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { fetchProductById } from "../services/productService";
+import { useParams, Link } from "react-router-dom";
+import { fetchProductById, fetchProductVariantsById } from "../services/productService";
+import "./style/ProductDetail.css";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [variants, setVariants] = useState([]);
   const [error, setError] = useState(null);
+  const [variantsError, setVariantsError] = useState(null);
 
   useEffect(() => {
+    // Fetch product details
     fetchProductById(id)
       .then((data) => setProduct(data))
       .catch((err) => setError(err.message));
   }, [id]);
 
-  if (error) return <div className="container">Error: {error}</div>;
-  if (!product) return <div className="container">Loading product details...</div>;
+  useEffect(() => {
+    // Fetch product variants
+    fetchProductVariantsById(id)
+      .then((data) => setVariants(data))
+      .catch((err) => setVariantsError(err.message));
+  }, [id]);
+
+  if (error) return <div className="error-message">Error: {error}</div>;
+  if (!product) return <div className="loading-message">Loading product details...</div>;
 
   return (
-    <div className="container" style={{ marginTop: "2rem" }}>
-      <h2 style={{ color: "var(--color-primary)" }}>{product.name}</h2>
+    <div className="product-detail-container">
+      <h2 className="product-title">{product.name}</h2>
       <img
         src={product.image}
         alt={product.name}
-        style={{ width: "300px", borderRadius: "4px", marginBottom: "1rem" }}
+        className="product-image"
       />
-      <p style={{ color: "var(--color-secondary)" }}>{product.description}</p>
-      <p style={{ fontWeight: "bold", color: "var(--color-secondary)" }}>
-        Price: ${product.basePrice}
+      <h3 className="product-details-header">Product Details</h3>
+      <p className="product-description">{product.description}</p>
+      <p className="product-price">
+        Price: ${product.base_price}
       </p>
-      {product.variants && product.variants.length > 0 && (
-        <div>
-          <h3 style={{ color: "var(--color-primary)" }}>Variants</h3>
-          <ul style={{ listStyleType: "none", padding: 0 }}>
-            {product.variants.map((variant) => (
-              <li key={variant.id} style={{ marginBottom: "0.5rem" }}>
+      <div className="variants-section">
+        <h3 className="variants-title">Variants</h3>
+        {variantsError && (
+          <p className="error-message">Error loading variants: {variantsError}</p>
+        )}
+        {variants.length > 0 ? (
+          <ul className="variants-list">
+            {variants.map((variant) => (
+              <li key={variant.id} className="variant-item">
                 <strong>Size:</strong> {variant.size}, <strong>Color:</strong>{" "}
                 {variant.color}, <strong>Price:</strong> ${variant.price},{" "}
-                <strong>Stock:</strong> {variant.stockQuantity}
+                <strong>Stock:</strong> {variant.stock_quantity}
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        ) : (
+          <p className="no-variants-message">
+            {variantsError ? "Failed to load variants." : "No variants available for this product."}
+          </p>
+        )}
+      </div>
+      <div className="order-section">
+        <Link to="/catalog" className="order-link">
+          Order
+        </Link>
+      </div>
+      <br/>
+      <Link to="/catalog" className="back-link">
+        Back to Product Catalog
+      </Link>
     </div>
   );
 };

@@ -3,20 +3,29 @@ import { useNavigate } from "react-router-dom";
 import { register } from "../services/authService";
 
 function Register() {
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rePassword, setRePassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [hasAgreed, setHasAgreed] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (password !== rePassword) {
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
+
+    // Check if the user has agreed to the terms
+    if (!hasAgreed) {
+      alert("You must agree to the terms and conditions!");
+      return;
+    }
+
     try {
-      await register(username, email, password);
+      await register(email, password); // Send only email and password
       alert("Registration successful! Please log in.");
       navigate("/");
     } catch (error) {
@@ -29,13 +38,6 @@ function Register() {
       <h1>DOMA</h1>
       <h2>Register</h2>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        /><br />
         <input
           type="email"
           placeholder="Email"
@@ -52,11 +54,23 @@ function Register() {
         /><br />
         <input
           type="password"
-          placeholder="Re-enter Password"
-          value={rePassword}
-          onChange={(e) => setRePassword(e.target.value)}
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           required
         /><br />
+        <div>
+          <input
+            type="checkbox"
+            id="terms"
+            checked={hasAgreed}
+            onChange={(e) => setHasAgreed(e.target.checked)}
+          />
+          <label htmlFor="terms">
+            I have read and agree to the <a href="/terms" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>.
+          </label>
+        </div>
+        <br />
         <button type="submit">Register</button>
       </form>
     </div>

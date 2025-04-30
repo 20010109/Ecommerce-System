@@ -50,7 +50,7 @@ const ProductCatalog = () => {
                 {product.name}
               </h3>
               <p style={{ color: "var(--color-secondary)" }}>
-                ${product.basePrice}
+                ${product.base_price}
               </p>
             </div>
           </Link>

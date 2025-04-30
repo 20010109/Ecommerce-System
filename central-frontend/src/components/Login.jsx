@@ -1,22 +1,21 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../services/authService";
 import "./style/Login.css"; // optional custom styles
+import { login } from "../services/authService"; // Backend API call
 
-function Login() {
-  const [username, setUsername] = useState("");
+const Login = () => {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const data = await login(username, password);
-      localStorage.setItem("authToken", data.token);
-      // After successful login, navigate to the Dashboard
-      navigate("/dashboard");
-    } catch (error) {
-      alert(error.message);
+      await login(email, password); // Call the backend API
+      navigate("/Dashboard"); // Redirect to dashboard or another page
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -26,26 +25,29 @@ function Login() {
       <h2 className="Login.text">Login</h2>
       <form onSubmit={handleSubmit}>
         <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
-        /><br />
+        />
+        <br />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-        /><br />
+        />
+        <br />
         <button type="submit">Login</button>
       </form>
+      {error && <p className="error-message">{error}</p>}
       <p>
         No account? <a href="/register">Sign up!</a>
       </p>
     </div>
   );
-}
+};
 
 export default Login;
