@@ -1,12 +1,13 @@
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { logout } from "../services/authService";
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    navigate("/");
+    logout();
+    navigate("/"); // Redirect to login page
   };
 
   return (

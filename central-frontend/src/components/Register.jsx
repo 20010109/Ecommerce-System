@@ -3,14 +3,28 @@ import { useNavigate } from "react-router-dom";
 import { register } from "../services/authService";
 
 function Register() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [hasAgreed, setHasAgreed] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    isSeller: false,
+    hasAgreed: false,
+  });
+
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const { email, password, confirmPassword, isSeller, hasAgreed } = formData;
 
     // Check if passwords match
     if (password !== confirmPassword) {
@@ -25,7 +39,7 @@ function Register() {
     }
 
     try {
-      await register(email, password); // Send only email and password
+      await register(email, password, isSeller); // Include isSeller in the registration
       alert("Registration successful! Please log in.");
       navigate("/");
     } catch (error) {
@@ -40,34 +54,57 @@ function Register() {
       <form onSubmit={handleSubmit}>
         <input
           type="email"
+          name="email"
           placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={formData.email}
+          onChange={handleChange}
           required
-        /><br />
+        />
+        <br />
         <input
           type="password"
+          name="password"
           placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={formData.password}
+          onChange={handleChange}
           required
-        /><br />
+        />
+        <br />
         <input
           type="password"
+          name="confirmPassword"
           placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          value={formData.confirmPassword}
+          onChange={handleChange}
           required
-        /><br />
+        />
+        <br />
         <div>
-          <input
-            type="checkbox"
-            id="terms"
-            checked={hasAgreed}
-            onChange={(e) => setHasAgreed(e.target.checked)}
-          />
-          <label htmlFor="terms">
-            I have read and agree to the <a href="/terms" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>.
+          <label>
+            <input
+              type="checkbox"
+              name="isSeller"
+              checked={formData.isSeller}
+              onChange={handleChange}
+            />
+            Are you a seller?
+          </label>
+          <br />
+          <label>
+            <input
+              type="checkbox"
+              name="hasAgreed"
+              checked={formData.hasAgreed}
+              onChange={handleChange}
+            />
+            I have read and agree to the{" "}
+            <a
+              href="/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Terms and Conditions
+            </a>.
           </label>
         </div>
         <br />

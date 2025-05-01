@@ -17,6 +17,7 @@ const ProductCatalog = () => {
 
   return (
     <div className="container">
+      <Link to="/dashboard" className="backbutton" >Back to Dashboard</Link>
       <h2 style={{ color: "var(--color-primary)" }}>Product Catalog</h2>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
         {products.map((product) => (

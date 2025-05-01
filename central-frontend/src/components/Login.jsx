@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./style/Login.css"; // optional custom styles
 import { login } from "../services/authService"; // Backend API call
+import domalogo from "./images/domalogo.png";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -21,10 +22,11 @@ const Login = () => {
 
   return (
     <div className="auth-container">
-      <h1 className="Title.text">DOMA</h1>
+      <img src={domalogo} alt="domalogo.png" className="domalogo"/>
       <h2 className="Login.text">Login</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="form">
         <input
+          className="email-input"
           type="email"
           placeholder="Email"
           value={email}
@@ -33,6 +35,7 @@ const Login = () => {
         />
         <br />
         <input
+          className="password-input"
           type="password"
           placeholder="Password"
           value={password}
@@ -40,11 +43,13 @@ const Login = () => {
           required
         />
         <br />
-        <button type="submit">Login</button>
+        <a href="/forgot-password" className="forgot-password">Forgot Password?</a>
+        <br />
+        <button type="submit" className="login-button">Login</button>
       </form>
       {error && <p className="error-message">{error}</p>}
-      <p>
-        No account? <a href="/register">Sign up!</a>
+      <p className="register-link-text">
+        No account? <a href="/register" className="register-link">Sign up!</a>
       </p>
     </div>
   );

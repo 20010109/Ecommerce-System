@@ -1,0 +1,81 @@
+# ---------------------------------------
+# Product and ProductVariant Types
+# ---------------------------------------
+type Product {
+  id: ID!
+  name: String!
+  description: String
+  basePrice: Float!
+  image: String
+  createdAt: String
+  updatedAt: String
+  variants: [ProductVariant!]!
+}
+
+type ProductVariant {
+  id: ID!
+  productID: ID!
+  variantName: String
+  size: String
+  color: String
+  price: Float!
+  stockQuantity: Int!
+  createdAt: String
+  updatedAt: String
+}
+
+# ---------------------------------------
+# Input Types for Mutations
+# ---------------------------------------
+input NewProductInput {
+  name: String!
+  description: String
+  basePrice: Float!
+  image: String
+}
+
+input UpdateProductInput {
+  name: String!
+  description: String
+  basePrice: Float!
+  image: String
+}
+
+input NewVariantInput {
+  productID: ID!
+  variantName: String
+  size: String
+  color: String
+  price: Float!
+  stockQuantity: Int!
+}
+
+input UpdateVariantInput {
+  variantName: String
+  size: String
+  color: String
+  price: Float!
+  stockQuantity: Int!
+}
+
+# ---------------------------------------
+# Queries
+# ---------------------------------------
+type Query {
+  products: [Product!]!
+  product(id: ID!): Product
+  productVariants(productID: ID!): [ProductVariant!]!
+}
+
+# ---------------------------------------
+# Mutations
+# ---------------------------------------
+type Mutation {
+  createProduct(input: NewProductInput!): Product!
+  updateProduct(id: ID!, input: UpdateProductInput!): Product!
+  deleteProduct(id: ID!): Boolean!
+
+  createVariant(input: NewVariantInput!): ProductVariant!
+  updateVariant(id: ID!, input: UpdateVariantInput!): ProductVariant!
+  deleteVariant(id: ID!): Boolean!
+}

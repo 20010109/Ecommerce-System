@@ -6,7 +6,7 @@ import (
     "net/http"
     "os"
 
-    "doma-product-go/handlers"
+    "ProductService/handlers"
 
     "github.com/gorilla/mux"
     "github.com/joho/godotenv"
