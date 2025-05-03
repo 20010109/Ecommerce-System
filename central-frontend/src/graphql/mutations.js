@@ -83,6 +83,7 @@ export const CREATE_VARIANT = gql`
     $size: String!
     $color: String!
     $stockQuantity: Int!
+    $image: String!
   ) {
     insert_product_variants(
       objects: {
@@ -91,6 +92,7 @@ export const CREATE_VARIANT = gql`
         size: $size
         color: $color
         stock_quantity: $stockQuantity
+        image: $image
       }
     ) {
       returning {
@@ -99,6 +101,7 @@ export const CREATE_VARIANT = gql`
         size
         color
         stock_quantity
+        image
         sku
       }
     }
@@ -113,6 +116,7 @@ export const UPDATE_VARIANT = gql`
     $size: String
     $color: String
     $stockQuantity: Int
+    $image: String!
   ) {
     update_product_variants(
       where: { id: { _eq: $id } }
@@ -121,6 +125,7 @@ export const UPDATE_VARIANT = gql`
         size: $size
         color: $color
         stock_quantity: $stockQuantity
+        image: $image
       }
     ) {
       returning {
@@ -129,6 +134,7 @@ export const UPDATE_VARIANT = gql`
         size
         color
         stock_quantity
+        image
         sku
       }
     }

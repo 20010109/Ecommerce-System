@@ -38,6 +38,7 @@ export const SUBSCRIBE_TO_NEW_VARIANTS = gql`
       size
       color
       stock_quantity
+      image
       sku
     }
   }

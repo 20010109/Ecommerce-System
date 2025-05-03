@@ -155,7 +155,7 @@ const Inventory = () => {
   // Create Variant
   const handleCreateVariant = async (e) => {
     e.preventDefault();
-    const { variantName, size, color, stockQuantity } = variantDetails;
+    const { variantName, size, color, stockQuantity, image } = variantDetails;
     try {
       await createVariant({
         variables: {
@@ -164,6 +164,7 @@ const Inventory = () => {
           size,
           color,
           stockQuantity: parseInt(stockQuantity, 10),
+          image,
         },
       });
       setVariantDetails({
@@ -171,6 +172,7 @@ const Inventory = () => {
         size: '',
         color: '',
         stockQuantity: '',
+        image: '',
       });
       setVariantModalOpen(false);
     } catch (err) {
@@ -356,7 +358,7 @@ const Inventory = () => {
           {selectedProduct && (
             <>
               <div className="modal-header">
-                <h2>{selectedProduct.name}</h2>
+                <h2>PRODUCT INFORMATION</h2>
                 <button
                   className="close-button"
                   onClick={closeProductDetailsModal}
@@ -368,108 +370,131 @@ const Inventory = () => {
               {isEditingProduct ? (
                 <form onSubmit={handleUpdateProductDetails}>
                   <h2>Edit Product Details:</h2>
-                  Name:
-                  <input
-                    type="text"
-                    name="name"
-                    value={productEditDetails.name}
-                    onChange={handleProductEditChange}
-                    required
-                  />
+                  <label>
+                    Name:
+                    <input
+                      type="text"
+                      name="name"
+                      value={productEditDetails.name}
+                      onChange={handleProductEditChange}
+                      required
+                    />
+                  </label>
                   <br />
-                  Description:
-                  <input
-                    name="description"
-                    type="text"
-                    value={productEditDetails.description}
-                    onChange={handleProductEditChange}
-                  />
+                  <label>
+                    Description:
+                    <input
+                      name="description"
+                      type="text"
+                      value={productEditDetails.description}
+                      onChange={handleProductEditChange}
+                    />
+                  </label>
                   <br />
-                  Base Price:
-                  <input
-                    type="number"
-                    name="basePrice"
-                    step="0.01"
-                    value={productEditDetails.basePrice}
-                    onChange={handleProductEditChange}
-                    required
-                  />
+                  <label>
+                    Base Price:
+                    <input
+                      type="number"
+                      name="basePrice"
+                      step="0.01"
+                      value={productEditDetails.basePrice}
+                      onChange={handleProductEditChange}
+                      required
+                    />
+                  </label>
                   <br />
-                  Image URL:
-                  <input
-                    type="text"
-                    name="image"
-                    value={productEditDetails.image}
-                    onChange={handleProductEditChange}
-                  />
+                  <label>
+                    Image URL:
+                    <input
+                      type="text"
+                      name="image"
+                      value={productEditDetails.image}
+                      onChange={handleProductEditChange}
+                    />
+                  </label>
                   <br />
-                  Category:
-                  <input
-                    type="text"
-                    name="category"
-                    value={productEditDetails.category}
-                    onChange={handleProductEditChange}
-                    required
-                  />
+                  <label>
+                    Category:
+                    <input
+                      type="text"
+                      name="category"
+                      value={productEditDetails.category}
+                      onChange={handleProductEditChange}
+                      required
+                    />
+                  </label>
                   <br />
-                  <button type="submit" className="btn btn-primary">
-                    Save Changes
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setIsEditingProduct(false)}
-                  >
-                    Cancel
-                  </button>
+                  <div className="modal-actions">
+                    <button type="submit" className="btn btn-primary">
+                      Save Changes
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setIsEditingProduct(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={() => handleDeleteProduct(selectedProduct.id)}
+                    >
+                      Delete Product
+                    </button>
+                  </div>
                 </form>
               ) : (
                 <>
-                  <img src={selectedProduct.image} alt={selectedProduct.image} />
-                  <p><strong>SKU:</strong> {selectedProduct.sku}</p>
-                  <p><strong>Category:</strong> {selectedProduct.category}</p>
-                  <p><strong>Description:</strong> {selectedProduct.description}</p>
-                  <p><strong>Price:</strong> ${selectedProduct.base_price}</p>
-                  <p><strong>Listed:</strong> {selectedProduct.listed ? 'Yes' : 'No'}</p>
-                  <div className="modal-actions">
-                  <button
-                    className="btn btn-warning"
-                    onClick={() => handleToggleListed(selectedProduct, !selectedProduct.listed)}
-                    disabled={toggleLoading}
-                  >
-                    {toggleLoading
-                      ? 'Updating...'
-                      : selectedProduct.listed
-                        ? 'Unlist Product'
-                        : 'List Product'}
-                  </button>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => handleDeleteProduct(selectedProduct.id)}
-                  >
-                    Delete Product
-                  </button>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => {
-                      setProductEditDetails({
-                        name: selectedProduct.name,
-                        description: selectedProduct.description,
-                        basePrice: selectedProduct.base_price,
-                        image: selectedProduct.image,
-                        category: selectedProduct.category,
-                      });
-                      setIsEditingProduct(true);
-                    }}
-                  >
-                    Edit Product
-                  </button>
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => setVariantModalOpen(true)}
-                  >
-                    Add Variant
-                  </button>
+                <div className='product-info'>
+                  <div className='product-info-leftdiv'>
+                    <img
+                      className='product-image'
+                      src={selectedProduct.image}
+                      alt={selectedProduct.name}
+                    />
+                  </div>
+                  <div className='product-info-rightdiv'>
+                    <p><strong>SKU:</strong> {selectedProduct.sku}</p>
+                    <p><strong>Category:</strong> {selectedProduct.category}</p>
+                    <p><strong>Description:</strong> {selectedProduct.description}</p>
+                    <p><strong>Price:</strong> ${selectedProduct.base_price}</p>
+                    <p><strong>Listed:</strong> {selectedProduct.listed ? 'Yes' : 'No'}</p>
+                    <div className="modal-actions">
+                      <button
+                        className="btn btn-warning"
+                        onClick={() => handleToggleListed(selectedProduct, !selectedProduct.listed)}
+                        disabled={toggleLoading}
+                      >
+                        {toggleLoading
+                          ? 'Updating...'
+                          : selectedProduct.listed
+                            ? 'Unlist Product'
+                            : 'List Product'}
+                      </button>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => {
+                          setProductEditDetails({
+                            name: selectedProduct.name,
+                            description: selectedProduct.description,
+                            basePrice: selectedProduct.base_price,
+                            image: selectedProduct.image,
+                            category: selectedProduct.category,
+                          });
+                          setIsEditingProduct(true);
+                        }}
+                      >
+                        Edit Product
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => setVariantModalOpen(true)}
+                      >
+                        Add Variant
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 </>
               )}
@@ -478,13 +503,18 @@ const Inventory = () => {
               <div className="variant-list">
                 {variantSubscriptionData?.product_variants?.length > 0 ? (
                   variantSubscriptionData.product_variants.map((variant) => (
-                    <div className="variant-card" key={variant.id}>
-                      <p>
-                        <strong>SKU:</strong> {variant.sku}
-                      </p>
-                      <p>
-                        {variant.variant_name} - {variant.size} - {variant.color} - Stock: {variant.stock_quantity}
-                      </p>
+                    <div className="variant-card" key={variant.id} >
+                      <div className='variant-imagediv'>
+                        <img className='variant-image' src={variant.image} alt={variant.image} />
+                      </div>
+                      <div className='variant-detailsdiv'>
+                        <p>
+                          <strong>SKU:</strong> {variant.sku}
+                        </p>
+                        <p>
+                          {variant.variant_name} - {variant.size} - {variant.color} - Stock: {variant.stock_quantity}
+                        </p>
+                      </div>
                       <div className="variant-actions">
                         <button
                           className="btn btn-primary"
@@ -495,6 +525,7 @@ const Inventory = () => {
                               size: variant.size,
                               color: variant.color,
                               stockQuantity: variant.stock_quantity,
+                              image: variant.image,
                             });
                             setVariantEditModalOpen(true);
                           }}
@@ -519,57 +550,95 @@ const Inventory = () => {
         </div>
       </Modal>
 
+
       {/* --- Add Variant Modal --- */}
       <Modal
         isOpen={variantModalOpen}
         onRequestClose={() => setVariantModalOpen(false)}
         contentLabel="Add Variant"
       >
-        <div className="modal-content">
-          <h2>Add Variant for {selectedProduct?.name}</h2>
-          <form onSubmit={handleCreateVariant}>
-            <input
-              type="text"
-              name="variantName"
-              placeholder="Variant Name"
-              value={variantDetails.variantName}
-              onChange={handleVariantChange}
-              required
-            />
-            <input
-              type="text"
-              name="size"
-              placeholder="Size (e.g., S, M, L)"
-              value={variantDetails.size}
-              onChange={handleVariantChange}
-              required
-            />
-            <input
-              type="text"
-              name="color"
-              placeholder="Color"
-              value={variantDetails.color}
-              onChange={handleVariantChange}
-              required
-            />
-            <input
-              type="number"
-              name="stockQuantity"
-              placeholder="Stock Quantity"
-              value={variantDetails.stockQuantity}
-              onChange={handleVariantChange}
-              required
-            />
-            <button type="submit" className="btn btn-primary">
-              Create Variant
+        <div className="add-variant-modal-maindiv">
+          <div className='add-variant-modal-header'>
+            <h2>Add Variant for {selectedProduct?.name}</h2>
+            <br />
+            <button
+              className="close-button"
+              onClick={() => setVariantModalOpen(false)}
+            >
+              x
             </button>
-          </form>
-          <button
-            className="btn btn-secondary"
-            onClick={() => setVariantModalOpen(false)}
-          >
-            Close
-          </button>
+          </div>
+          <div className='add-variant-modal-content'>
+            <div className='add-variant-modal-left-side'>
+              {variantDetails.image && (
+                  <div className="image-preview">
+                    {/* <p>Image Preview:</p> */}
+                    <img
+                      src={variantDetails.image}
+                      alt="Variant Preview"
+                      style={{ maxWidth: '200px', marginTop: '10px' }}
+                    />
+                  </div>
+                )}
+            </div>
+            <div className='add-variant-modal-right-side'>
+              <form onSubmit={handleCreateVariant}>
+                Variant Image URL:
+                <input
+                  type="text"
+                  name="image"
+                  placeholder="Image URL"
+                  value={variantDetails.image}
+                  onChange={handleVariantChange}
+                />
+                <br />
+                Variant Name:
+                <input
+                  type="text"
+                  name="variantName"
+                  placeholder="Variant Name"
+                  value={variantDetails.variantName}
+                  onChange={handleVariantChange}
+                  required
+                />
+                <br />
+                Variant Size:
+                <input
+                  type="text"
+                  name="size"
+                  placeholder="Size (e.g., S, M, L)"
+                  value={variantDetails.size}
+                  onChange={handleVariantChange}
+                  required
+                />
+                <br />
+                Variant Color:
+                <input
+                  type="text"
+                  name="color"
+                  placeholder="Color"
+                  value={variantDetails.color}
+                  onChange={handleVariantChange}
+                  required
+                />
+                <br />
+                Variant Stock Quantity:
+                <input
+                  type="number"
+                  name="stockQuantity"
+                  placeholder="Stock Quantity"
+                  value={variantDetails.stockQuantity}
+                  onChange={handleVariantChange}
+                  required
+                />
+                <br />
+                <button type="submit" className="btn btn-primary">
+                  Create Variant
+                </button>
+              </form>
+            </div>
+          </div>
+          
         </div>
       </Modal>
 
@@ -614,6 +683,25 @@ const Inventory = () => {
               onChange={handleVariantChange}
               required
             />
+            <br />
+            Variant Image URL:
+            <input
+              type="text"
+              name="image"
+              placeholder="Image URL"
+              value={variantDetails.image}
+              onChange={handleVariantChange}
+            />
+            {variantDetails.image && (
+              <div className="image-preview">
+                <p>Image Preview:</p>
+                <img
+                  src={variantDetails.image}
+                  alt="Variant Preview"
+                  style={{ maxWidth: '200px', marginTop: '10px' }}
+                />
+              </div>
+            )}
             <button type="submit" className="btn btn-primary">
               Update Variant
             </button>
