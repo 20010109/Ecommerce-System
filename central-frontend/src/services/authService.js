@@ -5,10 +5,10 @@ const API = axios.create({
   baseURL: "http://localhost:8000", // Replace with your backend URL
 });
 
-export async function register(email, password, isSeller) {
+export async function register(username, email, password, isSeller) {
   try {
     // Include isSeller in the request payload
-    const response = await API.post("/register", { email, password, is_seller: isSeller });
+    const response = await API.post("/register", {username, email, password, is_seller: isSeller });
 
     // Accept both 200 (OK) and 201 (Created) as success
     if (response.status === 200 || response.status === 201) {

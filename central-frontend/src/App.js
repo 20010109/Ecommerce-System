@@ -1,20 +1,28 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { ApolloProvider } from "@apollo/client";
-import { client } from "./api"; // Apollo client configured for Hasura
+import { client } from "./ApolloClient"; // Apollo client configured for Hasura
 
+// Components
 import Header from "./components/Header";
 import Login from "./components/Login";
 import Register from "./components/Register";
-import Dashboard from "./components/Dashboard";
-import ProductCatalog from "./components/ProductCatalog";
-import ProductDetail from "./components/ProductDetail";
 import AboutPage from "./components/About";
-import PrivateRoute from "./context/PrivateRoute";
-import Inventory from "./components/Inventory";
 
+// Buyer Pages
+import ProductCatalog from "./components/BuyerPages/BuyerProductCatalog";
+import ProductDetail from "./components/BuyerPages/BuyerProductDetail";
 
+// Seller Pages
+import SellerInventory from "./components/SellerPages/SellerInventory";
+import SellerDashboard from "./components/SellerPages/SellerDashboard";
 
+// Routes
+import PrivateRoute from "./routes/PrivateRoute";
+import RoleBasedRoute from "./routes/RoleBasedRoute";
+
+// Optional: You might want an UnauthorizedPage if users hit a restricted route
+import UnauthorizedPage from "./components/UnauthorizedPage";
 
 function AppContent() {
   const location = useLocation();
@@ -22,34 +30,51 @@ function AppContent() {
 
   return (
     <>
+      {/* Conditionally hide the Header */}
       {!hideHeaderPaths.includes(location.pathname) && <Header />}
+
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* Seller-only routes */}
         <Route
           path="/dashboard"
           element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
+            <RoleBasedRoute allowedRoles={['seller']}>
+              <SellerDashboard />
+            </RoleBasedRoute>
           }
         />
         <Route
+          path="/inventory"
+          element={
+            <RoleBasedRoute allowedRoles={['seller']}>
+              <SellerInventory />
+            </RoleBasedRoute>
+          }
+        />
+
+        {/* Buyer-only routes */}
+        <Route
           path="/catalog"
           element={
-            <PrivateRoute>
+            <RoleBasedRoute allowedRoles={['buyer']}>
               <ProductCatalog />
-            </PrivateRoute>
+            </RoleBasedRoute>
           }
         />
         <Route
           path="/catalog/:id"
           element={
-            <PrivateRoute>
+            <RoleBasedRoute allowedRoles={['buyer']}>
               <ProductDetail />
-            </PrivateRoute>
+            </RoleBasedRoute>
           }
         />
+
+        {/* General private route */}
         <Route
           path="/about"
           element={
@@ -58,14 +83,9 @@ function AppContent() {
             </PrivateRoute>
           }
         />
-        <Route 
-          path="/inventory"
-          element={
-            <PrivateRoute>
-              <Inventory />
-            </PrivateRoute>
-          }
-        />
+
+        {/* Unauthorized fallback */}
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
       </Routes>
     </>
   );

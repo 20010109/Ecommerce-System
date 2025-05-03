@@ -4,6 +4,7 @@ import { register } from "../services/authService";
 
 function Register() {
   const [formData, setFormData] = useState({
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -24,22 +25,25 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { email, password, confirmPassword, isSeller, hasAgreed } = formData;
+    const { username, email, password, confirmPassword, isSeller, hasAgreed } = formData;
 
-    // Check if passwords match
+    if (!username.trim()) {
+      alert("Username is required!");
+      return;
+    }
+
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
 
-    // Check if the user has agreed to the terms
     if (!hasAgreed) {
       alert("You must agree to the terms and conditions!");
       return;
     }
 
     try {
-      await register(email, password, isSeller); // Include isSeller in the registration
+      await register(username, email, password, isSeller);
       alert("Registration successful! Please log in.");
       navigate("/");
     } catch (error) {
@@ -52,6 +56,15 @@ function Register() {
       <h1>DOMA</h1>
       <h2>Register</h2>
       <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={formData.username}
+          onChange={handleChange}
+          required
+        />
+        <br />
         <input
           type="email"
           name="email"
@@ -98,11 +111,7 @@ function Register() {
               onChange={handleChange}
             />
             I have read and agree to the{" "}
-            <a
-              href="/terms"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href="/terms" target="_blank" rel="noopener noreferrer">
               Terms and Conditions
             </a>.
           </label>

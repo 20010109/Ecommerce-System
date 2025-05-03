@@ -1,0 +1,267 @@
+/* SellerInventory.css */
+
+
+.inventory-container {
+    padding: 2rem;
+    background-color: #f9ebeb; /* soft pinkish background */
+    min-height: 100vh;
+  }
+  
+  .inventory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .inventory-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .btn-add-product {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.95rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-add-product:hover {
+    background-color: #555;
+  }
+  
+  /* Table Styling */
+  .table-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  
+  .inventory-table thead {
+    background-color: #e0e0e0;
+  }
+  
+  .inventory-table th,
+  .inventory-table td {
+    text-align: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .inventory-table th {
+    font-weight: 600;
+    color: #444;
+  }
+  
+  .inventory-table tr:hover {
+    background-color: #f5f5f5;
+  }
+  
+  /* View button */
+  .view-button {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .view-button:hover {
+    background-color: #555;
+  }
+  
+  /* Pagination */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+  }
+  
+  .pagination button {
+    border: none;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.25rem;
+    border-radius: 50%;
+    background-color: #ccc;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .pagination button.active {
+    background-color: #333;
+    color: white;
+  }
+  
+  .pagination button:hover {
+    background-color: #999;
+  }
+  
+  /* Loading & Error States */
+  .table-container p {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+  }
+  
+  .product-details {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .product-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #f3f4f6;
+  }
+  
+  .product-info h3 {
+    font-size: 1rem;
+    margin: 0;
+    font-weight: 600;
+  }
+  
+  .product-info p {
+    margin: 2px 0;
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+  
+  .product-category {
+    font-style: italic;
+    color: #888;
+  }
+  
+  .product-price {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  
+  /* Side Panel Modal */
+  
+  .side-modal-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: auto;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    z-index: 1000;
+  }
+  
+  .side-modal {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 350px;
+    height: 100%;
+    background: #fff;
+    padding: 20px;
+    overflow-y: auto;
+    border-left: 1px solid #e5e7eb;
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .close-button {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  
+  .modal-content p {
+    margin: 5px 0;
+    font-size: 0.95rem;
+  }
+  
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+  }
+  
+  .variant-list {
+    margin-top: 15px;
+  }
+  
+  .variant-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 10px;
+    margin: 8px 0;
+  }
+  
+  .variant-card p {
+    margin: 3px 0;
+    font-size: 0.9rem;
+  }
+  
+  .variant-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  
+  /* Buttons */
+  
+  .btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .btn-primary {
+    background-color: #3b82f6;
+    color: #fff;
+  }
+  
+  .btn-primary:hover {
+    background-color: #2563eb;
+  }
+  
+  .btn-danger {
+    background-color: #ef4444;
+    color: #fff;
+  }
+  
+  .btn-danger:hover {
+    background-color: #dc2626;
+  }
+  
+  .btn-secondary {
+    background-color: #e5e7eb;
+    color: #374151;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #d1d5db;
+  }
+  
