@@ -18,7 +18,7 @@ const SellerDashboard = () => {
         <div className="dashboard-card">
           <h3>Orders</h3>
           <p>Check your latest orders and order history.</p>
-          <Link to="/orders" className="dashboard-link">View Orders</Link>
+          <Link to="/seller/orders" className="dashboard-link">View Orders</Link>
         </div>
 
         <div className="dashboard-card">

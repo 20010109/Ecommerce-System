@@ -24,8 +24,6 @@ export const GET_PRODUCTS = gql`
   }
 `;
 
-
-
 export const GET_PRODUCT_BY_ID = gql`
   query GetProductById($id: Int!) {
     products_by_pk(id: $id) {
@@ -39,6 +37,17 @@ export const GET_PRODUCT_BY_ID = gql`
       seller_username   
       seller_id
       sku
+    }
+  }
+`;
+
+export const GET_ORDERS = gql`
+  query GetOrders {
+    orders {
+      id
+      buyer_name
+      status
+      total_amount
     }
   }
 `;
