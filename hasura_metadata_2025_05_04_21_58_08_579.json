@@ -1,0 +1,404 @@
+{
+  "resource_version": 90,
+  "metadata": {
+    "version": 3,
+    "sources": [
+      {
+        "name": "default",
+        "kind": "postgres",
+        "tables": [],
+        "configuration": {
+          "connection_info": {
+            "database_url": {
+              "from_env": "HASURA_GRAPHQL_DATABASE_URL"
+            },
+            "isolation_level": "read-committed",
+            "pool_settings": {
+              "connection_lifetime": 600,
+              "idle_timeout": 180,
+              "max_connections": 50,
+              "retries": 1
+            },
+            "use_prepared_statements": true
+          }
+        }
+      },
+      {
+        "name": "inventorydb",
+        "kind": "postgres",
+        "tables": [
+          {
+            "table": {
+              "name": "product_variants",
+              "schema": "public"
+            },
+            "object_relationships": [
+              {
+                "name": "product",
+                "using": {
+                  "foreign_key_constraint_on": "product_id"
+                }
+              }
+            ],
+            "insert_permissions": [
+              {
+                "role": "seller",
+                "permission": {
+                  "check": {},
+                  "columns": [
+                    "color",
+                    "created_at",
+                    "id",
+                    "image",
+                    "product_id",
+                    "size",
+                    "sku",
+                    "stock_quantity",
+                    "updated_at",
+                    "variant_name"
+                  ]
+                },
+                "comment": ""
+              }
+            ],
+            "select_permissions": [
+              {
+                "role": "seller",
+                "permission": {
+                  "columns": [
+                    "color",
+                    "created_at",
+                    "id",
+                    "image",
+                    "product_id",
+                    "size",
+                    "sku",
+                    "stock_quantity",
+                    "updated_at",
+                    "variant_name"
+                  ],
+                  "filter": {},
+                  "allow_aggregations": true
+                },
+                "comment": ""
+              }
+            ],
+            "update_permissions": [
+              {
+                "role": "seller",
+                "permission": {
+                  "columns": [
+                    "color",
+                    "created_at",
+                    "id",
+                    "image",
+                    "product_id",
+                    "size",
+                    "sku",
+                    "stock_quantity",
+                    "updated_at",
+                    "variant_name"
+                  ],
+                  "filter": {},
+                  "check": {}
+                },
+                "comment": ""
+              }
+            ],
+            "delete_permissions": [
+              {
+                "role": "seller",
+                "permission": {
+                  "filter": {}
+                },
+                "comment": ""
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "products",
+              "schema": "public"
+            },
+            "array_relationships": [
+              {
+                "name": "product_variants",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "product_id",
+                    "table": {
+                      "name": "product_variants",
+                      "schema": "public"
+                    }
+                  }
+                }
+              }
+            ],
+            "insert_permissions": [
+              {
+                "role": "seller",
+                "permission": {
+                  "check": {},
+                  "set": {
+                    "seller_id": "x-hasura-User-Id",
+                    "seller_username": "x-hasura-User-Name"
+                  },
+                  "columns": [
+                    "base_price",
+                    "category",
+                    "created_at",
+                    "description",
+                    "id",
+                    "image",
+                    "listed",
+                    "name",
+                    "seller_id",
+                    "seller_username",
+                    "updated_at"
+                  ]
+                },
+                "comment": ""
+              }
+            ],
+            "select_permissions": [
+              {
+                "role": "seller",
+                "permission": {
+                  "columns": [
+                    "base_price",
+                    "category",
+                    "created_at",
+                    "description",
+                    "id",
+                    "image",
+                    "listed",
+                    "name",
+                    "seller_id",
+                    "seller_username",
+                    "sku",
+                    "updated_at"
+                  ],
+                  "filter": {
+                    "seller_id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  },
+                  "allow_aggregations": true
+                },
+                "comment": ""
+              }
+            ],
+            "update_permissions": [
+              {
+                "role": "seller",
+                "permission": {
+                  "columns": [
+                    "base_price",
+                    "category",
+                    "created_at",
+                    "description",
+                    "id",
+                    "image",
+                    "listed",
+                    "name",
+                    "updated_at"
+                  ],
+                  "filter": {
+                    "seller_id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  },
+                  "check": {}
+                },
+                "comment": ""
+              }
+            ],
+            "delete_permissions": [
+              {
+                "role": "seller",
+                "permission": {
+                  "filter": {
+                    "seller_id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  }
+                },
+                "comment": ""
+              }
+            ]
+          }
+        ],
+        "configuration": {
+          "connection_info": {
+            "database_url": "postgres://postgres:password@host.docker.internal:5432/inventorydb",
+            "isolation_level": "read-committed",
+            "use_prepared_statements": false
+          }
+        }
+      }
+    ],
+    "query_collections": [
+      {
+        "name": "allowed-queries",
+        "definition": {
+          "queries": [
+            {
+              "name": "GetProducts",
+              "query": "query GetProducts {\r\n    products {\r\n      id\r\n      name\r\n      description\r\n      base_price\r\n      image\r\n      category\r\n      seller_username  \r\n      seller_id         \r\n      sku\r\n      product_variants_aggregate {\r\n        aggregate {\r\n          sum {\r\n            stock_quantity\r\n          }\r\n        }\r\n      }\r\n    }\r\n  }"
+            },
+            {
+              "name": "CreateProduct",
+              "query": "mutation CreateProduct(\r\n    $name: String!\r\n    $description: String\r\n    $basePrice: numeric!\r\n    $image: String\r\n    $category: String!\r\n    $listed: Boolean!\r\n  ) {\r\n    insert_products(\r\n      objects: {\r\n        name: $name\r\n        description: $description\r\n        base_price: $basePrice\r\n        image: $image\r\n        category: $category\r\n        listed: $listed\r\n      }\r\n    ) {\r\n      returning {\r\n        id\r\n        name\r\n        description\r\n        base_price\r\n        image\r\n        category\r\n        listed     \r\n      }\r\n    }\r\n  }"
+            },
+            {
+              "name": "ToggleListedStatus",
+              "query": "mutation ToggleListedStatus($id: Int!, $listed: Boolean!) {\r\n    update_products(\r\n      where: { id: { _eq: $id } }\r\n      _set: { listed: $listed }\r\n    ) {\r\n      returning {\r\n        id\r\n        listed\r\n      }\r\n    }\r\n  }"
+            },
+            {
+              "name": "CreateVariant",
+              "query": "mutation CreateVariant(\r\n    $productId: Int!\r\n    $variantName: String!\r\n    $size: String!\r\n    $color: String!\r\n    $stockQuantity: Int!\r\n    $image: String!\r\n  ) {\r\n    insert_product_variants(\r\n      objects: {\r\n        product_id: $productId\r\n        variant_name: $variantName\r\n        size: $size\r\n        color: $color\r\n        stock_quantity: $stockQuantity\r\n        image: $image\r\n      }\r\n    ) {\r\n      returning {\r\n        id\r\n        variant_name\r\n        size\r\n        color\r\n        stock_quantity\r\n        image\r\n        sku\r\n      }\r\n    }\r\n  }"
+            },
+            {
+              "name": "DeleteVariant",
+              "query": "mutation DeleteVariant($id: Int!) {\r\n    delete_product_variants(where: { id: { _eq: $id } }) {\r\n      affected_rows\r\n    }\r\n  }"
+            },
+            {
+              "name": "UpdateVariant",
+              "query": "mutation UpdateVariant(\r\n    $id: Int!\r\n    $variantName: String\r\n    $size: String\r\n    $color: String\r\n    $stockQuantity: Int\r\n    $image: String!\r\n  ) {\r\n    update_product_variants(\r\n      where: { id: { _eq: $id } }\r\n      _set: {\r\n        variant_name: $variantName\r\n        size: $size\r\n        color: $color\r\n        stock_quantity: $stockQuantity\r\n        image: $image\r\n      }\r\n    ) {\r\n      returning {\r\n        id\r\n        variant_name\r\n        size\r\n        color\r\n        stock_quantity\r\n        image\r\n        sku\r\n      }\r\n    }\r\n  }"
+            },
+            {
+              "name": "UpdateProduct",
+              "query": "mutation UpdateProduct(\r\n    $id: Int!\r\n    $name: String!\r\n    $description: String\r\n    $basePrice: numeric!\r\n    $image: String\r\n    $category: String!\r\n  ) {\r\n    update_products(\r\n      where: { id: { _eq: $id } }\r\n      _set: {\r\n        name: $name\r\n        description: $description\r\n        base_price: $basePrice\r\n        image: $image\r\n        category: $category\r\n      }\r\n    ) {\r\n      returning {\r\n        id\r\n        name\r\n        description\r\n        base_price\r\n        image\r\n        category\r\n        updated_at\r\n      }\r\n    }\r\n  }"
+            },
+            {
+              "name": "DeleteProduct",
+              "query": "mutation DeleteProduct($id: Int!) {\r\n    delete_products(where: { id: { _eq: $id } }) {\r\n      affected_rows\r\n    }\r\n  }"
+            }
+          ]
+        }
+      }
+    ],
+    "allowlist": [
+      {
+        "collection": "allowed-queries",
+        "scope": {
+          "global": true
+        }
+      }
+    ],
+    "rest_endpoints": [
+      {
+        "comment": "",
+        "definition": {
+          "query": {
+            "collection_name": "allowed-queries",
+            "query_name": "CreateProduct"
+          }
+        },
+        "methods": [
+          "POST"
+        ],
+        "name": "CreateProduct",
+        "url": "createproduct"
+      },
+      {
+        "comment": "",
+        "definition": {
+          "query": {
+            "collection_name": "allowed-queries",
+            "query_name": "CreateVariant"
+          }
+        },
+        "methods": [
+          "POST"
+        ],
+        "name": "CreateVariant",
+        "url": "createvariant"
+      },
+      {
+        "comment": "",
+        "definition": {
+          "query": {
+            "collection_name": "allowed-queries",
+            "query_name": "DeleteProduct"
+          }
+        },
+        "methods": [
+          "DELETE"
+        ],
+        "name": "DeleteProduct",
+        "url": "deleteproduct/:id"
+      },
+      {
+        "comment": "",
+        "definition": {
+          "query": {
+            "collection_name": "allowed-queries",
+            "query_name": "DeleteVariant"
+          }
+        },
+        "methods": [
+          "DELETE"
+        ],
+        "name": "DeleteVariant",
+        "url": "deletevariant/:id"
+      },
+      {
+        "comment": "",
+        "definition": {
+          "query": {
+            "collection_name": "allowed-queries",
+            "query_name": "GetProducts"
+          }
+        },
+        "methods": [
+          "GET"
+        ],
+        "name": "GetProducts",
+        "url": "products"
+      },
+      {
+        "comment": "",
+        "definition": {
+          "query": {
+            "collection_name": "allowed-queries",
+            "query_name": "ToggleListedStatus"
+          }
+        },
+        "methods": [
+          "PUT"
+        ],
+        "name": "ToggleListedStatus",
+        "url": "togglelistedstatus/:id"
+      },
+      {
+        "comment": "",
+        "definition": {
+          "query": {
+            "collection_name": "allowed-queries",
+            "query_name": "UpdateProduct"
+          }
+        },
+        "methods": [
+          "PUT"
+        ],
+        "name": "UpdateProduct",
+        "url": "updateproduct/:id"
+      },
+      {
+        "comment": "",
+        "definition": {
+          "query": {
+            "collection_name": "allowed-queries",
+            "query_name": "UpdateVariant"
+          }
+        },
+        "methods": [
+          "PUT"
+        ],
+        "name": "UpdateVariant",
+        "url": "updatevariant/:id"
+      }
+    ]
+  }
+}
