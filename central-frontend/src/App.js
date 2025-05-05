@@ -16,6 +16,8 @@ import ProductDetail from "./components/BuyerPages/BuyerProductDetail";
 // Seller Pages
 import SellerInventory from "./components/SellerPages/SellerInventory";
 import SellerDashboard from "./components/SellerPages/SellerDashboard";
+import SellerOrdersPage from "./components/SellerPages/SellerOrdersPage";
+import SellerOrderDetail from "./components/SellerPages/SellerOrderDetail";
 
 // Routes
 import PrivateRoute from "./routes/PrivateRoute";
@@ -52,6 +54,22 @@ function AppContent() {
           element={
             <RoleBasedRoute allowedRoles={['seller']}>
               <SellerInventory />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/seller/orders"
+          element={
+            <RoleBasedRoute allowedRoles={['seller']}>
+              <SellerOrdersPage />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/seller/orders/:orderId"
+          element={
+            <RoleBasedRoute allowedRoles={['seller']}>
+              <SellerOrderDetail />
             </RoleBasedRoute>
           }
         />
