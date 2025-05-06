@@ -1,17 +1,24 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Modal from 'react-modal';
-import { useSubscription } from '@apollo/client';
-import axios from 'axios';
-import { SUBSCRIBE_TO_NEW_PRODUCTS, SUBSCRIBE_TO_NEW_VARIANTS } from '../../graphql/subscriptions';
+import { useSubscription, useMutation } from '@apollo/client';
+import {
+  CREATE_PRODUCT,
+  UPDATE_PRODUCT,
+  DELETE_PRODUCT,
+  CREATE_VARIANT,
+  UPDATE_VARIANT,
+  DELETE_VARIANT,
+  TOGGLE_LISTED_STATUS,
+} from '../../graphql/mutations';
+import {
+  SUBSCRIBE_TO_NEW_PRODUCTS,
+  SUBSCRIBE_TO_NEW_VARIANTS,
+} from '../../graphql/subscriptions';
 import "./style/SellerInventory.css";
 
 Modal.setAppElement('#root');
 
 const Inventory = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [productDetailsModalOpen, setProductDetailsModalOpen] = useState(false);
   const [variantModalOpen, setVariantModalOpen] = useState(false);
@@ -34,179 +41,178 @@ const Inventory = () => {
     color: '',
     price: '',
     stockQuantity: '',
+    image: '',
   });
   const [selectedVariant, setSelectedVariant] = useState(null); // For editing variant
 
-  // subscriptions
-  const { data: subscriptionData } = useSubscription(SUBSCRIBE_TO_NEW_PRODUCTS);
+  // Subscriptions
+  const { data: subscriptionData, loading, error } = useSubscription(SUBSCRIBE_TO_NEW_PRODUCTS);
   const { data: variantSubscriptionData } = useSubscription(SUBSCRIBE_TO_NEW_VARIANTS, {
     skip: !selectedProduct,
     variables: { productId: selectedProduct?.id },
   });
 
-    // ✅ Fetch Products (initial + fallback)
-    const fetchProducts = useCallback(async () => {
-      setLoading(true);
-      try {
-        const token = localStorage.getItem('token');
-        const res = await axios.get('http://localhost:8080/api/rest/products', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        setProducts(res.data.products);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching products:", err);
-        setError(err);
-        setLoading(false);
-      }
-    }, []);  // ✅ no dependencies if nothing inside changes
-    
-  
-    useEffect(() => {
-      fetchProducts();
-    }, [fetchProducts]);
-  
-    // ✅ Sync subscription updates with products list
-    const productsList = useMemo(() => {
-      return subscriptionData?.products || products || [];
-    }, [subscriptionData, products]);
-  
-    useEffect(() => {
-      if (!selectedProduct) return;
-      const updatedProduct = productsList.find((p) => p.id === selectedProduct.id);
-      if (updatedProduct && updatedProduct !== selectedProduct) {
-        setSelectedProduct(updatedProduct);
-      }
-    }, [productsList, selectedProduct]);
-  
-    // ✅ Product Handlers
-  
-    const handleCreateProduct = async (e) => {
-      e.preventDefault();
-      const form = e.target;
-      const formData = {
-        name: form.name.value,
-        description: form.description.value,
-        basePrice: parseFloat(form.basePrice.value),
-        image: form.image.value,
-        category: form.category.value,
-        listed: form.listed.checked || false,
-      };
-  
-      try {
-        await axios.post('http://localhost:8080/api/rest/createproduct', formData);
-        form.reset();
-        setProductModalOpen(false);
-      } catch (err) {
-        console.error("Error creating product:", err);
-      }
-    };
-  
-    const handleDeleteProduct = async (id) => {
-      try {
-        await axios.delete(`http://localhost:8080/api/rest/deleteproduct/${id}`);
-        setProductDetailsModalOpen(false);
-      } catch (err) {
-        console.error("Error deleting product:", err);
-      }
-    };
-  
-    const handleToggleListed = async (product, newListedStatus) => {
-      console.log("Toggling listed status for product:", product.id, "to", newListedStatus);
-      try {
-        await axios.put(`http://localhost:8080/api/rest/togglelistedstatus/${product.id}`, {
-          listed: newListedStatus,
-        });
-      } catch (err) {
-        console.error("Error toggling listed status:", err);
-      }
-    };
-  
-    const handleUpdateProductDetails = async (e) => {
-      e.preventDefault();
-      try {
-        await axios.put(`http://localhost:8080/api/rest/updateproduct/${selectedProduct.id}`, {
+  // Mutations
+  const [createProduct] = useMutation(CREATE_PRODUCT);
+  const [updateProduct] = useMutation(UPDATE_PRODUCT);
+  const [deleteProduct] = useMutation(DELETE_PRODUCT);
+  const [createVariant] = useMutation(CREATE_VARIANT);
+  const [updateVariant] = useMutation(UPDATE_VARIANT);
+  const [deleteVariant] = useMutation(DELETE_VARIANT);
+  const [toggleListedStatus] = useMutation(TOGGLE_LISTED_STATUS);
+
+  // Sync subscription updates with products list
+  const productsList = useMemo(() => {
+    return subscriptionData?.products || [];
+  }, [subscriptionData]);
+
+  // Update selectedProduct if products list changes
+  useEffect(() => {
+    if (!selectedProduct) return;
+    const updatedProduct = productsList.find((p) => p.id === selectedProduct.id);
+    if (updatedProduct && updatedProduct !== selectedProduct) {
+      setSelectedProduct(updatedProduct);
+    }
+  }, [productsList, selectedProduct]);
+
+  // Product Handlers
+  const handleCreateProduct = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+
+    try {
+      await createProduct({
+        variables: {
+          name: form.name.value,
+          description: form.description.value || null,
+          basePrice: parseFloat(form.basePrice.value),
+          image: form.image.value || null,
+          category: form.category.value,
+          listed: form.listed.checked || false,
+        },
+      });
+      form.reset();
+      setProductModalOpen(false);
+    } catch (err) {
+      console.error("Error creating product:", err);
+    }
+  };
+
+  const handleUpdateProductDetails = async (e) => {
+    e.preventDefault();
+    try {
+      await updateProduct({
+        variables: {
+          id: selectedProduct.id,
           name: productEditDetails.name,
-          description: productEditDetails.description,
+          description: productEditDetails.description || null,
           basePrice: parseFloat(productEditDetails.basePrice),
-          image: productEditDetails.image,
+          image: productEditDetails.image || null,
           category: productEditDetails.category,
-          listed: Boolean(productEditDetails.listed),
-        });
-        setIsEditingProduct(false);
-      } catch (err) {
-        console.error("Error updating product details:", err);
-      }
-    };
-  
-    const handleProductEditChange = (e) => {
-      const { name, value, type, checked } = e.target;
-      setProductEditDetails((prev) => ({
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value,
-      }));
-    };
-  
-    // ✅ Variant Handlers
-    const handleCreateVariant = async (e) => {
-      e.preventDefault();
-      const { variantName, size, color, stockQuantity, image } = variantDetails;
-      try {
-        await axios.post('http://localhost:8080/api/rest/createvariant', {
+        }
+      });
+      setIsEditingProduct(false);
+    } catch (err) {
+      console.error("Error updating product details:", err);
+    }
+  };
+
+  const handleDeleteProduct = async (id) => {
+    try {
+      await deleteProduct({
+        variables: { id }
+      });
+      setProductDetailsModalOpen(false);
+    } catch (err) {
+      console.error("Error deleting product:", err);
+    }
+  };
+
+  const handleToggleListed = async (product, newListedStatus) => {
+    console.log("Toggling listed status for product:", product.id, "to", newListedStatus);
+    try {
+      await toggleListedStatus({
+        variables: {
+          id: product.id,
+          listed: newListedStatus,
+        }
+      });
+    } catch (err) {
+      console.error("Error toggling listed status:", err);
+    }
+  };
+
+  const handleProductEditChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setProductEditDetails((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  // Variant Handlers
+  const handleCreateVariant = async (e) => {
+    e.preventDefault();
+    const { variantName, size, color, stockQuantity, image } = variantDetails;
+    try {
+      await createVariant({
+        variables: {
           productId: selectedProduct.id,
           variantName,
           size,
           color,
           stockQuantity: parseInt(stockQuantity, 10),
-          image,
-        });
-        setVariantDetails({
-          variantName: '',
-          size: '',
-          color: '',
-          stockQuantity: '',
-          image: '',
-        });
-        setVariantModalOpen(false);
-      } catch (err) {
-        console.error("Error creating variant:", err);
-      }
-    };
-  
-    const handleDeleteVariant = async (variantId) => {
-      try {
-        await axios.delete(`http://localhost:8080/api/rest/deletevariant/${variantId}`);
-      } catch (err) {
-        console.error("Error deleting variant:", err);
-      }
-    };
-  
-    const handleUpdateVariant = async (e) => {
-      e.preventDefault();
-      const { variantName, size, color, stockQuantity, image } = variantDetails;
-      try {
-        await axios.put(`http://localhost:8080/api/rest/updatevariant/${selectedVariant.id}`, {
+          image: image || "",
+        },
+      });
+      setVariantDetails({
+        variantName: '',
+        size: '',
+        color: '',
+        stockQuantity: '',
+        image: '',
+      });
+      setVariantModalOpen(false);
+    } catch (err) {
+      console.error("Error creating variant:", err);
+    }
+  };
+
+  const handleUpdateVariant = async (e) => {
+    e.preventDefault();
+    const { variantName, size, color, stockQuantity, image } = variantDetails;
+    try {
+      await updateVariant({
+        variables: {
+          id: selectedVariant.id,
           variantName,
           size,
           color,
           stockQuantity: parseInt(stockQuantity, 10),
-          image,
-        });
-        setVariantEditModalOpen(false);
-      } catch (err) {
-        console.error("Error updating variant:", err);
-      }
-    };
-  
-    const handleVariantChange = (e) => {
-      const { name, value } = e.target;
-      setVariantDetails((prev) => ({ ...prev, [name]: value }));
-    };
+          image: image || "",
+        },
+      });
+      setVariantEditModalOpen(false);
+    } catch (err) {
+      console.error("Error updating variant:", err);
+    }
+  };
 
+  const handleDeleteVariant = async (variantId) => {
+    try {
+      await deleteVariant({
+        variables: { id: variantId }
+      });
+    } catch (err) {
+      console.error("Error deleting variant:", err);
+    }
+  };
 
-  // Close Modal
+  const handleVariantChange = (e) => {
+    const { name, value } = e.target;
+    setVariantDetails((prev) => ({ ...prev, [name]: value }));
+  };
+
   const closeProductDetailsModal = () => {
     setProductDetailsModalOpen(false);
     setSelectedProduct(null);
@@ -214,11 +220,11 @@ const Inventory = () => {
   };
   
   return (
-    <div className="inventory-container">
-      <div className="inventory-header">
-        <h1 className="inventory-title">Inventory Management</h1>
+    <div className="sellerinv-inventory-container">
+      <div className="sellerinv-inventory-header">
+        <h1 className="sellerinv-inventory-title">Inventory Management</h1>
         <button
-          className="btn btn-add-product"
+          className="sellerinv-btn sellerinv-btn-add-product"
           onClick={() => setProductModalOpen(true)}
         >
           Add Product
@@ -226,11 +232,11 @@ const Inventory = () => {
       </div>
 
       {/* Product Table */}
-      <div className="table-container">
+      <div className="sellerinv-table-container">
         {loading && <p>Loading products...</p>}
         {error && <p>Error fetching products: {error.message}</p>}
         {!loading && !error && (
-          <table className="inventory-table">
+          <table className="sellerinv-inventory-table">
             <thead>
               <tr>
                 <th>Product ID</th>
@@ -264,7 +270,7 @@ const Inventory = () => {
                       <td>₱{parseFloat(product.base_price).toLocaleString()}</td>
                       <td>
                         <button
-                          className="view-button"
+                          className="sellerinv-view-button"
                           onClick={() => {
                             setSelectedProduct(product);
                             setProductDetailsModalOpen(true);
@@ -293,7 +299,7 @@ const Inventory = () => {
         onRequestClose={() => setProductModalOpen(false)}
         contentLabel="Create Product"
       >
-        <div className="modal-content">
+        <div className="sellerinv-modal-content">
           <h2>Create Product</h2>
           <form onSubmit={handleCreateProduct}>
             <input name="name" type="text" placeholder="Product Name" required />
@@ -319,12 +325,12 @@ const Inventory = () => {
               <input name="listed" type="checkbox" defaultChecked={false} />
               List this product immediately?
             </label>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="sellerinv-btn sellerinv-btn-primary">
               Create Product
             </button>
           </form>
           <button
-            className="btn btn-secondary"
+            className="sellerinv-btn sellerinv-btn-secondary"
             onClick={() => setProductModalOpen(false)}
           >
             Close
@@ -338,13 +344,13 @@ const Inventory = () => {
         onRequestClose={closeProductDetailsModal}
         contentLabel="Product Details"
       >
-        <div className="modal-content">
+        <div className="sellerinv-modal-content">
           {selectedProduct && (
             <>
-              <div className="modal-header">
+              <div className="sellerinv-modal-header">
                 <h2>PRODUCT INFORMATION</h2>
                 <button
-                  className="close-button"
+                  className="sellerinv-close-button"
                   onClick={closeProductDetailsModal}
                 >
                   ×
@@ -403,20 +409,20 @@ const Inventory = () => {
                       required
                     />
                   </label>
-                  <div className="modal-actions">
-                    <button type="submit" className="btn btn-primary">
+                  <div className="sellerinv-modal-actions">
+                    <button type="submit" className="sellerinv-btn sellerinv-btn-primary">
                       Save Changes
                     </button>
                     <button
                       type="button"
-                      className="btn btn-secondary"
+                      className="sellerinv-btn sellerinv-btn-secondary"
                       onClick={() => setIsEditingProduct(false)}
                     >
                       Cancel
                     </button>
                     <button
                       type="button"
-                      className="btn btn-danger"
+                      className="sellerinv-btn sellerinv-btn-danger"
                       onClick={() => handleDeleteProduct(selectedProduct.id)}
                     >
                       Delete Product
@@ -424,29 +430,29 @@ const Inventory = () => {
                   </div>
                 </form>
               ) : (
-                <div className="product-info">
-                  <div className="product-info-leftdiv">
+                <div className="sellerinv-product-info">
+                  <div className="sellerinv-product-info-leftdiv">
                     <img
-                      className="product-image"
+                      className="sellerinv-product-image"
                       src={selectedProduct.image}
                       alt={selectedProduct.name}
                     />
                   </div>
-                  <div className="product-info-rightdiv">
+                  <div className="sellerinv-product-info-rightdiv">
                     <p><strong>SKU:</strong> {selectedProduct.sku}</p>
                     <p><strong>Category:</strong> {selectedProduct.category}</p>
                     <p><strong>Description:</strong> {selectedProduct.description}</p>
                     <p><strong>Price:</strong> ₱{selectedProduct.base_price}</p>
                     <p><strong>Listed:</strong> {selectedProduct.listed ? 'Yes' : 'No'}</p>
-                    <div className="modal-actions">
+                    <div className="sellerinv-modal-actions">
                       <button
-                        className="btn btn-warning"
+                        className="sellerinv-btn sellerinv-btn-warning"
                         onClick={() => handleToggleListed(selectedProduct, !selectedProduct.listed)}
                       >
                         {selectedProduct.listed ? 'Unlist Product' : 'List Product'}
                       </button>
                       <button
-                        className="btn btn-primary"
+                        className="sellerinv-btn sellerinv-btn-primary"
                         onClick={() => {
                           setProductEditDetails({
                             name: selectedProduct.name,
@@ -461,7 +467,7 @@ const Inventory = () => {
                         Edit Product
                       </button>
                       <button
-                        className="btn btn-secondary"
+                        className="sellerinv-btn sellerinv-btn-secondary"
                         onClick={() => setVariantModalOpen(true)}
                       >
                         Add Variant
@@ -472,22 +478,22 @@ const Inventory = () => {
               )}
 
               <h3>Variants</h3>
-              <div className="variant-list">
+              <div className="sellerinv-variant-list">
                 {variantSubscriptionData?.product_variants?.length > 0 ? (
                   variantSubscriptionData.product_variants.map((variant) => (
-                    <div className="variant-card" key={variant.id}>
-                      <div className="variant-imagediv">
-                        <img className="variant-image" src={variant.image} alt={variant.image} />
+                    <div className="sellerinv-variant-card" key={variant.id}>
+                      <div className="sellerinv-variant-imagediv">
+                        <img className="sellerinv-variant-image" src={variant.image} alt={variant.image} />
                       </div>
-                      <div className="variant-detailsdiv">
+                      <div className="sellerinv-variant-detailsdiv">
                         <p><strong>SKU:</strong> {variant.sku}</p>
                         <p>
                           {variant.variant_name} - {variant.size} - {variant.color} - Stock: {variant.stock_quantity}
                         </p>
                       </div>
-                      <div className="variant-actions">
+                      <div className="sellerinv-variant-actions">
                         <button
-                          className="btn btn-primary"
+                          className="sellerinv-btn sellerinv-btn-primary"
                           onClick={() => {
                             setSelectedVariant(variant);
                             setVariantDetails({
@@ -503,7 +509,7 @@ const Inventory = () => {
                           Edit
                         </button>
                         <button
-                          className="btn btn-secondary"
+                          className="sellerinv-btn sellerinv-btn-secondary"
                           onClick={() => handleDeleteVariant(variant.id)}
                         >
                           Delete
@@ -526,20 +532,20 @@ const Inventory = () => {
         onRequestClose={() => setVariantModalOpen(false)}
         contentLabel="Add Variant"
       >
-        <div className="add-variant-modal-maindiv">
-          <div className="add-variant-modal-header">
+        <div className="sellerinv-add-variant-modal-maindiv">
+          <div className="sellerinv-add-variant-modal-header">
             <h2>Add Variant for {selectedProduct?.name}</h2>
             <button
-              className="close-button"
+              className="sellerinv-close-button"
               onClick={() => setVariantModalOpen(false)}
             >
               ×
             </button>
           </div>
-          <div className="add-variant-modal-content">
-            <div className="add-variant-modal-left-side">
+          <div className="sellerinv-add-variant-modal-content">
+            <div className="sellerinv-add-variant-modal-left-side">
               {variantDetails.image && (
-                <div className="image-preview">
+                <div className="sellerinv-image-preview">
                   <img
                     src={variantDetails.image}
                     alt="Variant Preview"
@@ -548,7 +554,7 @@ const Inventory = () => {
                 </div>
               )}
             </div>
-            <div className="add-variant-modal-right-side">
+            <div className="sellerinv-add-variant-modal-right-side">
               <form onSubmit={handleCreateVariant}>
                 Variant Image URL:
                 <input
@@ -594,7 +600,7 @@ const Inventory = () => {
                   onChange={handleVariantChange}
                   required
                 />
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="sellerinv-btn sellerinv-btn-primary">
                   Create Variant
                 </button>
               </form>
@@ -609,7 +615,7 @@ const Inventory = () => {
         onRequestClose={() => setVariantEditModalOpen(false)}
         contentLabel="Edit Variant"
       >
-        <div className="modal-content">
+        <div className="sellerinv-modal-content">
           <h2>Edit Variant</h2>
           <form onSubmit={handleUpdateVariant}>
             <input
@@ -653,7 +659,7 @@ const Inventory = () => {
               onChange={handleVariantChange}
             />
             {variantDetails.image && (
-              <div className="image-preview">
+              <div className="sellerinv-image-preview">
                 <img
                   src={variantDetails.image}
                   alt="Variant Preview"
@@ -661,12 +667,12 @@ const Inventory = () => {
                 />
               </div>
             )}
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="sellerinv-btn sellerinv-btn-primary">
               Update Variant
             </button>
           </form>
           <button
-            className="btn btn-secondary"
+            className="sellerinv-btn sellerinv-btn-secondary"
             onClick={() => setVariantEditModalOpen(false)}
           >
             Close

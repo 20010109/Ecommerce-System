@@ -1,280 +1,280 @@
-/* SellerInventory.css */
+.sellerinv-inventory-container {
+  padding: 2rem;
+  background-color: #f9ebeb; /* soft pinkish background */
+  min-height: 100vh;
+}
+
+.sellerinv-inventory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.sellerinv-inventory-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.sellerinv-btn-add-product {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.sellerinv-btn-add-product:hover {
+  background-color: #555;
+}
+
+/* Table Styling */
+.sellerinv-table-container {
+  overflow-x: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.sellerinv-inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.sellerinv-inventory-table thead {
+  background-color: #e0e0e0;
+}
+
+.sellerinv-inventory-table th,
+.sellerinv-inventory-table td {
+  text-align: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.sellerinv-inventory-table th {
+  font-weight: 600;
+  color: #444;
+}
+
+.sellerinv-inventory-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* View button */
+.sellerinv-view-button {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.sellerinv-view-button:hover {
+  background-color: #555;
+}
+
+/* Pagination */
+.sellerinv-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.sellerinv-pagination button {
+  border: none;
+  padding: 0.5rem 0.75rem;
+  margin: 0 0.25rem;
+  border-radius: 50%;
+  background-color: #ccc;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.sellerinv-pagination button.active {
+  background-color: #333;
+  color: white;
+}
+
+.sellerinv-pagination button:hover {
+  background-color: #999;
+}
+
+/* Loading & Error States */
+.sellerinv-table-container p {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+/* Product Details */
+.sellerinv-product-info {
+  display: grid;
+  grid-template-columns: 300px auto;
+}
+
+.sellerinv-product-image {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #f3f4f6;
+}
 
 
-.inventory-container {
-    padding: 2rem;
-    background-color: #f9ebeb; /* soft pinkish background */
-    min-height: 100vh;
-  }
-  
-  .inventory-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-  }
-  
-  .inventory-title {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .btn-add-product {
-    background-color: #333;
-    color: white;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    font-size: 0.95rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .btn-add-product:hover {
-    background-color: #555;
-  }
-  
-  /* Table Styling */
-  .table-container {
-    overflow-x: auto;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .inventory-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.95rem;
-  }
-  
-  .inventory-table thead {
-    background-color: #e0e0e0;
-  }
-  
-  .inventory-table th,
-  .inventory-table td {
-    text-align: center;
-    padding: 0.75rem;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .inventory-table th {
-    font-weight: 600;
-    color: #444;
-  }
-  
-  .inventory-table tr:hover {
-    background-color: #f5f5f5;
-  }
-  
-  /* View button */
-  .view-button {
-    background-color: #333;
-    color: white;
-    border: none;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .view-button:hover {
-    background-color: #555;
-  }
-  
-  /* Pagination */
-  .pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 1rem;
-  }
-  
-  .pagination button {
-    border: none;
-    padding: 0.5rem 0.75rem;
-    margin: 0 0.25rem;
-    border-radius: 50%;
-    background-color: #ccc;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .pagination button.active {
-    background-color: #333;
-    color: white;
-  }
-  
-  .pagination button:hover {
-    background-color: #999;
-  }
-  
-  /* Loading & Error States */
-  .table-container p {
-    text-align: center;
-    padding: 2rem;
-    color: #666;
-  }
-  
-  .product-details {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
+.sellerinv-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
 
-  .product-info{
-    display: grid;
-    grid-template-columns: 300px auto;
-  }
-  
-  .product-image {
-    width: 200px;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 8px;
-    background: #f3f4f6;
-  }
-  
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  
-  .close-button {
-    background: transparent;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-  }
-  
-  .modal-content p {
-    margin: 5px 0;
-    font-size: 0.95rem;
-  }
-  
-  .modal-actions {
-    display: flex;
-    gap: 10px;
-    margin: 15px 0;
-  }
-  
-  .variant-list {
-    margin-top: 15px;
-  }
-  
-  .variant-card {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    padding: 10px;
-    margin: 8px 0;
-    grid-template-columns: auto auto auto;
-  }
+.sellerinv-close-button {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
 
-  .variant-imagediv{
-    grid-column: 1;
-  }
+.sellerinv-modal-content p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+}
 
-  .variant-detailsdiv{
-    grid-column: 2;
-  }
+.sellerinv-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
 
-  .variant-image{
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 8px;
-    background: #f3f4f6;
-  }
-  
-  .variant-card p {
-    margin: 3px 0;
-    font-size: 0.9rem;
-  }
-  
-  .variant-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-    grid-column: 3;
-  }
+.sellerinv-variant-list {
+  margin-top: 15px;
+}
 
-  /* Add Variant Modal */
+.sellerinv-variant-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 10px;
+  margin: 8px 0;
+  grid-template-columns: auto auto auto;
+}
 
-  .add-variant-modal-content{
-    display: grid;
-    grid-template-columns: auto auto;
-    grid-gap: 10px;
-    margin: 5px 0;
-    font-size: 0.95rem;
-  }
+.sellerinv-variant-imagediv {
+  grid-column: 1;
+}
 
-  .add-variant-modal-header{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
+.sellerinv-variant-detailsdiv {
+  grid-column: 2;
+}
 
-  .add-variant-modal-left-side{
-    border: black 2px solid;
-    background-color: #f9fafb;
-    height: 300px;
-    width: 300px;
-    margin: 0 auto;
-    margin-top: 10px;
-    grid-column: 1;
-  }
+.sellerinv-variant-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #f3f4f6;
+}
 
-  .add-variant-modal-right-side{
-    grid-column: 2;
-  }
+.sellerinv-variant-card p {
+  margin: 3px 0;
+  font-size: 0.9rem;
+}
+
+.sellerinv-variant-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  grid-column: 3;
+}
 
 
-  /* modal overlay animations */
+/* Add Variant Modal */
+.sellerinv-add-variant-modal-content {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-gap: 10px;
+  margin: 5px 0;
+  font-size: 0.95rem;
+}
 
-  
-  
-  /* Buttons */
-  
-  .btn {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s ease;
-  }
-  
-  .btn-primary {
-    background-color: #3b82f6;
-    color: #fff;
-  }
-  
-  .btn-primary:hover {
-    background-color: #2563eb;
-  }
-  
-  .btn-danger {
-    background-color: #ef4444;
-    color: #fff;
-  }
-  
-  .btn-danger:hover {
-    background-color: #dc2626;
-  }
-  
-  .btn-secondary {
-    background-color: #e5e7eb;
-    color: #374151;
-  }
-  
-  .btn-secondary:hover {
-    background-color: #d1d5db;
-  }
-  
+.sellerinv-add-variant-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.sellerinv-add-variant-modal-left-side {
+  border: black 2px solid;
+  background-color: #f9fafb;
+  height: 300px;
+  width: 300px;
+  margin: 0 auto;
+  margin-top: 10px;
+  grid-column: 1;
+}
+
+.sellerinv-add-variant-modal-right-side {
+  grid-column: 2;
+}
+
+.sellerinv-image-preview {
+  /* If you had styles before for image-preview, move here */
+}
+
+/* Buttons */
+.sellerinv-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.sellerinv-btn-primary {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+.sellerinv-btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.sellerinv-btn-danger {
+  background-color: #ef4444;
+  color: #fff;
+}
+
+.sellerinv-btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.sellerinv-btn-secondary {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.sellerinv-btn-secondary:hover {
+  background-color: #d1d5db;
+}
+
+/* (NEW) Warning button used in JSX */
+.sellerinv-btn-warning {
+  background-color: #fbbf24;
+  color: #374151;
+}
+
+.sellerinv-btn-warning:hover {
+  background-color: #f59e0b;
+}

@@ -1,7 +1,8 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "./style/Header.css";
+import "./common/Header.css";
 import { jwtDecode } from "jwt-decode";
+import { FaShoppingCart } from "react-icons/fa";  // Icon for the logo
 
 function Header() {
   const navigate = useNavigate();
@@ -25,45 +26,41 @@ function Header() {
 
   return (
     <header className="header">
-      <div className="header-div">
-        <h1 className="header-title">DOMA</h1>
+      <div className="header-container">
+        {/* Logo + Brand */}
+        <div className="brand">
+          <FaShoppingCart className="brand-icon" />
+          <h1 className="header-title">DOMA</h1>
+        </div>
 
-        <input
-          type="text"
-          className="search-bar"
-          placeholder="Search..."
-        />
+        {/* Search bar */}
+        <input type="text" className="search-bar" placeholder="Search products..." />
 
-        <div className="navbar-div">
-          {/* Buyer Links */}
+        {/* Nav links */}
+        <nav className="navbar">
           {userRole === "buyer" && (
             <>
-              <Link to="/catalog" className="tocatalog">Catalog</Link>
-              <Link to="/order" className="toorder">Order</Link>
+              <Link to="/catalog">Catalog</Link>
+              <Link to="/order">Order</Link>
             </>
           )}
 
-          {/* Seller Links */}
           {userRole === "seller" && (
             <>
-              <Link to="/dashboard" className="todashboard">Dashboard</Link>
-              <Link to="/inventory" className="toinventory">Inventory</Link>
+              <Link to="/dashboard">Dashboard</Link>
+              <Link to="/inventory">Inventory</Link>
             </>
           )}
 
-          {/* Common Links */}
-          <Link to="/about" className="toabout">About</Link>
+          <Link to="/about">About</Link>
+          <Link to="/profile">Profile</Link>
 
-          {/* Optional: Profile */}
-          <Link to="/profile" className="toprofile">Profile</Link>
-
-          {/* Logout button */}
           {token && (
             <button onClick={handleLogout} className="logout-button">
               Logout
             </button>
           )}
-        </div>
+        </nav>
       </div>
     </header>
   );

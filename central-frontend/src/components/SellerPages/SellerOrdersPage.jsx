@@ -2,7 +2,7 @@ import React from "react";
 import { useQuery } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
 import { GET_ORDERS } from "../../graphql/queries"; // Adjust path if needed
-import "../style/SellerOrdersPage.css"; // Create later for styling
+import "./style/SellerOrdersPage.css"; // Create later for styling
 
 const SellerOrdersPage = () => {
   const { loading, error, data } = useQuery(GET_ORDERS);

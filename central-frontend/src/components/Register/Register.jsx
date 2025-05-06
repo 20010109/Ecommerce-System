@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { register } from "../services/authService";
+import { register } from "../../api/authService";
 import "./style/Register.css";
-import domalogo from "./images/domalogo.png";
+import domalogo from "../images/domalogo.png";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -85,23 +85,22 @@ function Register() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="form-card">
-        {/* Logo image at the top */}
-        <img
-          src={domalogo}
-          alt="DOMA Logo"
-          className="logo"
-        />
-        <h1 className="auth-title">Register</h1>
-        <form onSubmit={handleSubmit} className="register-form">
+        <div className="register-container">
+          <div className="register-card">
+            <img
+              src={domalogo}
+              alt="DOMA Logo"
+              className="register-logo"
+            />
+            <h1 className="register-title">Register</h1>
+            <form onSubmit={handleSubmit} className="register-form">
           <input
             type="text"
             name="username"
             placeholder="Username"
             value={formData.username}
             onChange={handleChange}
-            className="form-input"
+            className="register-input"
             required
           />
           <input
@@ -110,7 +109,7 @@ function Register() {
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}
-            className="form-input"
+            className="register-input"
             required
           />
           <input
@@ -119,7 +118,7 @@ function Register() {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className="form-input"
+            className="register-input"
             required
           />
           <input
@@ -128,7 +127,7 @@ function Register() {
             placeholder="Confirm Password"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className="form-input"
+            className="register-input"
             required
           />
           <input
@@ -137,7 +136,7 @@ function Register() {
             placeholder="Contact Number"
             value={formData.contactNumber}
             onChange={handleChange}
-            className="form-input"
+            className="register-input"
             required
           />
           <input
@@ -146,7 +145,7 @@ function Register() {
             placeholder="Address"
             value={formData.address}
             onChange={handleChange}
-            className="form-input"
+            className="register-input"
             required
           />
           <div className="checkbox-group">
@@ -159,6 +158,7 @@ function Register() {
               />
               Are you a seller?
             </label>
+            <br />
             <label className="checkbox-label">
               <input
                 type="checkbox"
@@ -172,7 +172,7 @@ function Register() {
               </a>.
             </label>
           </div>
-          <button type="submit" className="submit-btn">
+          <button type="submit" className="register-button">
             Register
           </button>
         </form>

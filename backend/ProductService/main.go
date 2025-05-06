@@ -1,60 +1,26 @@
 package main
 
 import (
-    "fmt"
     "log"
     "net/http"
-    "os"
-
-    "ProductService/handlers"
-
+    "ProductService/handler"
     "github.com/gorilla/mux"
-    "github.com/joho/godotenv"
+    "github.com/rs/cors"
 )
 
-func enableCORS(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        w.Header().Set("Access-Control-Allow-Origin", "*")
-        w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-        if r.Method == http.MethodOptions {
-            w.WriteHeader(http.StatusOK)
-            return
-        }
-
-        next.ServeHTTP(w, r)
-    })
-}
-
 func main() {
-    // Load environment variables
-    if err := godotenv.Load(); err != nil {
-        log.Println("Warning: .env file not found; using environment variables.")
-    }
-
-    // Initialize the Supabase client
-    handlers.InitDB()
-
-    // Create a new router
     router := mux.NewRouter()
+    router.HandleFunc("/products", handler.GetAllProducts).Methods("GET")
 
-    // Define REST endpoints
-    router.HandleFunc("/getproducts", handlers.GetProducts).Methods("GET")
-    router.HandleFunc("/getproducts/{id}", handlers.GetProduct).Methods("GET")
-	router.HandleFunc("/getproducts/{id}/variants", handlers.GetProductVariants).Methods("GET")
-	router.HandleFunc("/getproducts/{id}/variants/{variant_id}", handlers.GetProductVariant).Methods("GET")
+    log.Println("✅ ProductService running on :8081 (with CORS enabled)")
 
-    // Wrap the router with the CORS middleware
-    handlerWithCORS := enableCORS(router)
+    c := cors.New(cors.Options{
+        AllowedOrigins:   []string{"*"},
+        AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+        AllowedHeaders:   []string{"Authorization", "Content-Type"},
+        AllowCredentials: true,
+    })
 
-    // Get the port from the environment or use the default
-    port := os.Getenv("PORT")
-    if port == "" {
-        port = "8001"
-    }
-    fmt.Printf("ProductService REST API running on port %s\n", port)
-
-    // Start the server
-    log.Fatal(http.ListenAndServe(":"+port, handlerWithCORS))
+    handler := c.Handler(router)
+    log.Fatal(http.ListenAndServe(":8081", handler))
 }

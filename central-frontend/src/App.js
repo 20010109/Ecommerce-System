@@ -1,29 +1,29 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { ApolloProvider } from "@apollo/client";
-import { client } from "./ApolloClient"; // Apollo client configured for Hasura
+import { client } from "./ApolloClient/ApolloClientInventory"; // Apollo client for Hasura
 
 // Components
 import Header from "./components/Header";
-import Login from "./components/Login";
-import Register from "./components/Register";
+import Login from "./components/Login/Login";
+import Register from "./components/Register/Register";
 import AboutPage from "./components/About";
 
-// Buyer Pages
-import ProductCatalog from "./components/BuyerPages/BuyerProductCatalog";
-import ProductDetail from "./components/BuyerPages/BuyerProductDetail";
+// Buyer Pages (REST-based)
+import BuyerProductCatalog from "./components/BuyerPages/BuyerProductCatalog";
+import BuyerProductDetails from "./components/BuyerPages/BuyerProductDetail";
 
-// Seller Pages
+// Seller Pages (still Apollo-based)
 import SellerInventory from "./components/SellerPages/SellerInventory";
 import SellerDashboard from "./components/SellerPages/SellerDashboard";
 import SellerOrdersPage from "./components/SellerPages/SellerOrdersPage";
-import SellerOrderDetail from "./components/SellerPages/SellerOrderDetail";
+// import SellerOrderDetail from "./components/SellerPages/SellerOrderDetail";
 
 // Routes
 import PrivateRoute from "./routes/PrivateRoute";
 import RoleBasedRoute from "./routes/RoleBasedRoute";
 
-// Optional: You might want an UnauthorizedPage if users hit a restricted route
+// Optional: Unauthorized fallback
 import UnauthorizedPage from "./components/UnauthorizedPage";
 
 function AppContent() {
@@ -65,21 +65,21 @@ function AppContent() {
             </RoleBasedRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/seller/orders/:orderId"
           element={
             <RoleBasedRoute allowedRoles={['seller']}>
               <SellerOrderDetail />
             </RoleBasedRoute>
           }
-        />
+        /> */}
 
-        {/* Buyer-only routes */}
+        {/* Buyer-only routes (REST-based) */}
         <Route
           path="/catalog"
           element={
             <RoleBasedRoute allowedRoles={['buyer']}>
-              <ProductCatalog />
+              <BuyerProductCatalog />
             </RoleBasedRoute>
           }
         />
@@ -87,7 +87,7 @@ function AppContent() {
           path="/catalog/:id"
           element={
             <RoleBasedRoute allowedRoles={['buyer']}>
-              <ProductDetail />
+              <BuyerProductDetails />
             </RoleBasedRoute>
           }
         />

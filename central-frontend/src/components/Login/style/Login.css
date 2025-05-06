@@ -1,0 +1,128 @@
+:root {
+    --color-bg: #F8EDED;
+    --color-accent: #FF8225;
+    --color-primary: #B43F3F;
+    --color-secondary: #173B45;
+}
+
+.login-page {
+    background-color: var(--color-bg);
+    color: var(--color-secondary);
+    font-family: 'Roboto', sans-serif;
+    min-height: 100vh; /* full page height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Container for the whole login card */
+.login-container {
+    background: #ffffff;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Logo styling */
+.login-logo {
+    width: 150px;
+    height: 150px;
+    margin-bottom: 20px;
+}
+
+/* Title */
+.login-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 30px;
+    color: var(--color-secondary);
+}
+
+/* Input fields */
+.login-email-input,
+.login-password-input {
+    width: 100%; /* ✅ Fill the container width */
+    padding: 15px; /* ✅ Comfortable padding */
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 16px;
+    color: #333;
+    background-color: #f0f0f0;
+    transition: border 0.3s;
+    box-sizing: border-box; /* ✅ ensures padding + border fit inside width */
+}
+
+.login-email-input:focus,
+.login-password-input:focus {
+    border-color: var(--color-accent);
+    outline: none;
+    background-color: #fff;
+}
+
+
+/* Forgot password link */
+.login-forgot {
+    color: var(--color-secondary);
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 14px;
+    display: block;
+    margin: 10px 0 20px;
+    transition: color 0.3s;
+}
+
+.login-forgot:hover {
+    color: var(--color-primary);
+}
+
+/* Login button */
+.login-button {
+    background-color: var(--color-accent);
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.login-button:hover {
+    background-color: var(--color-secondary);
+}
+
+/* Register section */
+.login-register-text {
+    margin-top: 20px;
+    font-size: 14px;
+    color: var(--color-secondary);
+}
+
+.login-register-link {
+    color: var(--color-accent);
+    text-decoration: none;
+    margin-left: 5px;
+}
+
+.login-register-link:hover {
+    text-decoration: underline;
+}
+
+/* Error message */
+.login-error {
+    color: #e11d48;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/* Responsive tweak */
+@media (max-width: 480px) {
+    .login-container {
+        padding: 25px;
+    }
+}

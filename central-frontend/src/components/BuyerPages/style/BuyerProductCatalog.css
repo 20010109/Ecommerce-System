@@ -1,0 +1,96 @@
+/* Main container for the catalog */
+.catalog-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px auto;
+    max-width: 1200px; /* Maximum width for larger screens */
+    padding: 20px;
+    background-color: #f9f9f9; /* Light background color for contrast */
+    border-radius: 8px; /* Soft corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
+  }
+  
+  /* Title styling */
+  .catalog-title {
+    font-size: 2.5em; /* Large font size for the title */
+    color: #333; /* Darker text color */
+    margin-bottom: 20px; /* Spacing below the title */
+    text-align: center;
+  }
+  
+  /* Grid layout for products */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Responsive grid with auto-fill */
+    gap: 16px; /* Space between grid items */
+    width: 100%; /* Full width */
+  }
+  
+  /* Product card link */
+  .product-card-link {
+    text-decoration: none; /* Remove underline from links */
+    color: inherit; /* Inherit text color */
+  }
+  
+  /* Styling for each product card */
+  .product-card {
+    background-color: #fff; /* White background for cards */
+    border: 1px solid #ddd; /* Light border */
+    border-radius: 8px; /* Soft corners */
+    overflow: hidden; /* Hide overflow for images */
+    transition: transform 0.2s; /* Smooth transition on hover */
+  }
+  
+  /* Hover effect for product cards */
+  .product-card:hover {
+    transform: scale(1.02); /* Slightly enlarge card on hover */
+  }
+  
+  /* Image styling for products */
+  .product-image {
+    width: 100%; /* Image takes full width of card */
+    height: auto; /* Maintain aspect ratio */
+  }
+  
+  /* Product info area */
+  .product-info {
+    padding: 16px; /* Spacing around text content */
+  }
+  
+  /* Product name styling */
+  .product-name {
+    font-size: 1.6em; /* Font size for product name */
+    margin: 0; /* Remove default margin */
+    color: #007bff; /* Bootstrap primary color for emphasis */
+  }
+  
+  /* Styling for product category */
+  .product-category {
+    font-size: 1.1em; /* Smaller font size for category */
+    color: #666; /* Medium gray for contrast */
+  }
+  
+  /* Styling for product price */
+  .product-price {
+    font-weight: bold; /* Bold font for price */
+    color: #e63946; /* Highlight color for price */
+    font-size: 1.4em; /* Slightly larger font */
+  }
+  
+  /* Styling for seller information */
+  .product-seller {
+    font-size: 0.9em; /* Smaller font for seller */
+    color: #888; /* Lighter gray */
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .catalog-title {
+      font-size: 2em; /* Slightly smaller title on smaller screens */
+    }
+  
+    .product-grid {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Adjust grid for smaller screens */
+    }
+  }

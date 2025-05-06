@@ -1,64 +1,46 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { fetchProducts } from "../../services/productService";
+import React from 'react';
+import { useQuery } from '@apollo/client';
+import { GET_PRODUCTS } from '../../graphql/buyerCatalogQueries';
+import { Link } from 'react-router-dom';
+import './style/BuyerProductCatalog.css';
 
-const ProductCatalog = () => {
-  const [products, setProducts] = useState([]);
-  const [error, setError] = useState(null);
+export default function BuyerProductCatalog() {
+  const { loading, error, data } = useQuery(GET_PRODUCTS);
 
-  useEffect(() => {
-    fetchProducts()
-      .then((data) => setProducts(data))
-      .catch((err) => setError(err.message));
-  }, []);
-
-  if (error) return <div className="container">Error: {error}</div>;
-  if (!products.length) return <div className="container">Loading products...</div>;
+  if (loading) return <p className="loading-text">Loading products...</p>;
+  if (error) {
+    console.error('GraphQL error:', error);
+    return <p className="error-text">Error loading products.</p>;
+  }
 
   return (
-    <div className="container">
-      <Link to="/dashboard" className="backbutton" >Back to Dashboard</Link>
-      <h2 style={{ color: "var(--color-primary)" }}>Product Catalog</h2>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-        {products.map((product) => (
+    <div className="catalog-container">
+      <h1 className="catalog-title">🛍️ Browse Our Catalog</h1>
+      <div className="product-grid">
+        {data.products.map((product) => (
           <Link
-            key={product.id}
             to={`/catalog/${product.id}`}
-            style={{ textDecoration: "none", color: "inherit" }}
+            key={product.id}
+            className="product-card-link"
           >
-            <div
-              style={{
-                backgroundColor: "#fff",
-                border: `2px solid var(--color-accent)`,
-                borderRadius: "4px",
-                width: "220px",
-                padding: "1rem",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                cursor: "pointer"
-              }}
-            >
+            <div className="product-card">
               <img
                 src={product.image}
                 alt={product.name}
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  marginBottom: "0.5rem",
-                  borderRadius: "4px"
-                }}
+                className="product-image"
               />
-              <h3 style={{ margin: "0.5rem 0", fontSize: "1.1rem" }}>
-                {product.name}
-              </h3>
-              <p style={{ color: "var(--color-secondary)" }}>
-                ${product.base_price}
-              </p>
+              <div className="product-info">
+                <h2 className="product-name">{product.name}</h2>
+                <p className="product-category">{product.category}</p>
+                <p className="product-price">${product.base_price}</p>
+                <p className="product-seller">
+                  Seller: {product.seller_username}
+                </p>
+              </div>
             </div>
           </Link>
         ))}
       </div>
     </div>
   );
-};
-
-export default ProductCatalog;
+}
