@@ -75,9 +75,17 @@ function Register() {
       return;
     }
 
+    // 👇 Map isSeller to role
+    const role = isSeller ? "seller" : "buyer";
+
+    // 👇 Convert address string to JSON (wrap as full_address)
+    const addressObj = {
+      full_address: address,
+    };
+
     try {
-      await register(username, email, password, isSeller, contactNumber, address);
-      alert("Registration successful! Please log in.");
+      await register(username, email, password, role, contactNumber, addressObj);
+      alert("Registration successful! You can now log in.");  // ✅ UPDATED
       navigate("/");
     } catch (error) {
       alert(error.message || "Registration failed. Please try again.");
@@ -85,15 +93,15 @@ function Register() {
   };
 
   return (
-        <div className="register-container">
-          <div className="register-card">
-            <img
-              src={domalogo}
-              alt="DOMA Logo"
-              className="register-logo"
-            />
-            <h1 className="register-title">Register</h1>
-            <form onSubmit={handleSubmit} className="register-form">
+    <div className="register-container">
+      <div className="register-card">
+        <img
+          src={domalogo}
+          alt="DOMA Logo"
+          className="register-logo"
+        />
+        <h1 className="register-title">Register</h1>
+        <form onSubmit={handleSubmit} className="register-form">
           <input
             type="text"
             name="username"

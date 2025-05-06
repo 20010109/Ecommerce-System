@@ -7,6 +7,7 @@ import (
     "log"
     "net/http"
     "os"
+    "strings"
     "time"
 
     "github.com/dgrijalva/jwt-go"
@@ -36,24 +37,23 @@ func init() {
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
     var req struct {
-        Username      string `json:"username"`
-        Email         string `json:"email"`
-        Password      string `json:"password"`
-        IsSeller      bool   `json:"is_seller"`
-        ContactNumber string `json:"contact_number"`
-        Address       string `json:"address"`
+        Username    string                 `json:"username"`
+        Email       string                 `json:"email"`
+        Password    string                 `json:"password"`
+        Role        string                 `json:"role"`
+        FirstName   string                 `json:"first_name,omitempty"`
+        LastName    string                 `json:"last_name,omitempty"`
+        PhoneNumber string                 `json:"phone_number,omitempty"`
+        Address     map[string]interface{} `json:"address,omitempty"`
     }
-
-    log.Printf("Register request: %+v\n", req)
 
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
         http.Error(w, "Invalid request payload", http.StatusBadRequest)
         return
     }
 
-    // Basic validation
-    if req.Username == "" || req.Email == "" || req.Password == "" {
-        http.Error(w, "Username, email, and password are required", http.StatusBadRequest)
+    if req.Username == "" || req.Email == "" || req.Password == "" || req.Role == "" {
+        http.Error(w, "Username, email, password, and role are required", http.StatusBadRequest)
         return
     }
 
@@ -63,21 +63,45 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    var addressJSON []byte
+    if req.Address != nil {
+        addressJSON, err = json.Marshal(req.Address)
+        if err != nil {
+            http.Error(w, "Invalid address format", http.StatusBadRequest)
+            return
+        }
+    }
+
     _, err = db.Exec(
         context.Background(),
-        `INSERT INTO users (username, email, password, is_seller, contact_number, address)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        req.Username, req.Email, string(hashedPassword), req.IsSeller, req.ContactNumber, req.Address,
+        `INSERT INTO users 
+        (username, email, password, role, first_name, last_name, phone_number, address, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())`,
+        req.Username,
+        req.Email,
+        string(hashedPassword),
+        req.Role,
+        req.FirstName,
+        req.LastName,
+        req.PhoneNumber,
+        addressJSON,
     )
     if err != nil {
-        http.Error(w, "Error registering user", http.StatusInternalServerError)
+        log.Println("DB Exec error:", err)
+        if strings.Contains(err.Error(), "duplicate key") {
+            http.Error(w, "Username or email already exists", http.StatusConflict)
+        } else {
+            http.Error(w, "Error registering user", http.StatusInternalServerError)
+        }
         return
     }
 
-    
-
+    // ✅ Final JSON response
+    w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(http.StatusCreated)
-    w.Write([]byte("User registered successfully"))
+    json.NewEncoder(w).Encode(map[string]string{
+        "message": "User registered successfully. You can now log in.",
+    })
 }
 
 // ==================== LOGIN HANDLER ====================
@@ -96,27 +120,40 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
     var userID int
     var username string
     var hashedPassword string
-    var isSeller bool
-    var contactNumber string
-    var address string
+    var role string
+    var phoneNumber string
+    var addressJSON []byte
 
+    // 🔑 Fetch user
     err := db.QueryRow(
         context.Background(),
-        `SELECT id, username, password, is_seller, contact_number, address FROM users WHERE email = $1`,
+        `SELECT id, username, password, role, phone_number, address
+         FROM users
+         WHERE email = $1`,
         req.Email,
-    ).Scan(&userID, &username, &hashedPassword, &isSeller, &contactNumber, &address)
+    ).Scan(&userID, &username, &hashedPassword, &role, &phoneNumber, &addressJSON)
 
     if err != nil {
+        log.Println("DB error (login):", err)
         http.Error(w, "Invalid email or password", http.StatusUnauthorized)
         return
     }
 
+    // ✅ Check password
     if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(req.Password)); err != nil {
         http.Error(w, "Invalid email or password", http.StatusUnauthorized)
         return
     }
 
-    token, err := GenerateJWT(userID, username, req.Email, isSeller, contactNumber, address)
+    // ✅ Decode address JSON
+    var address interface{}
+    if len(addressJSON) > 0 {
+        if err := json.Unmarshal(addressJSON, &address); err != nil {
+            address = nil // fallback
+        }
+    }
+
+    token, err := GenerateJWT(userID, username, req.Email, role, phoneNumber, address)
     if err != nil {
         http.Error(w, "Error generating token", http.StatusInternalServerError)
         return
@@ -128,28 +165,22 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 // ==================== JWT GENERATOR ====================
 
-func GenerateJWT(userID int, username string, email string, isSeller bool, contactNumber string, address string) (string, error) {
-    role := "buyer"
-    if isSeller {
-        role = "seller"
-    }
-
+func GenerateJWT(userID int, username string, email string, role string, phoneNumber string, address interface{}) (string, error) {
     claims := jwt.MapClaims{
-        "user_id":        userID,
-        "username":       username,
-        "email":          email,
-        "is_seller":      isSeller,
-        "contact_number": contactNumber,
-        "address":        address,
-        "exp":            time.Now().Add(time.Hour * 24).Unix(),
+        "user_id":      userID,
+        "username":     username,
+        "email":        email,
+        "role":         role,
+        "phone_number": phoneNumber,
+        "address":      address,
+        "exp":          time.Now().Add(time.Hour * 24).Unix(),
         "https://hasura.io/jwt/claims": map[string]interface{}{
             "x-hasura-default-role":  role,
-            "x-hasura-allowed-roles": []string{"seller", "buyer"},
+            "x-hasura-allowed-roles": []string{"seller", "buyer", "admin"},
             "x-hasura-user-id":       fmt.Sprintf("%d", userID),
             "x-hasura-user-name":     username,
         },
     }
-    
 
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
     return token.SignedString(jwtSecret)

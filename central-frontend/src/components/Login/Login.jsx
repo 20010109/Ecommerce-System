@@ -20,10 +20,10 @@ const Login = () => {
     try {
       const data = await login(email, password);  // ✅ Get the token response
       const decoded = jwtDecode(data.token);      // ✅ Decode the token
-      const isSeller = decoded.is_seller;
+      const role = decoded.role;
 
       // ✅ Redirect based on role
-      if (isSeller) {
+      if (role === "seller") {
         navigate("/dashboard");
       } else {
         navigate("/catalog");

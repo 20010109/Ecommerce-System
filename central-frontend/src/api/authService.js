@@ -5,27 +5,23 @@ const API = axios.create({
   baseURL: "http://localhost:8000", // Replace with your backend URL
 });
 
-export async function register(username, email, password, isSeller, contact_number, address) {
+export async function register(username, email, password, role, contact_number, address) {
   try {
-    // Include all fields in the request payload
     const response = await API.post("/register", {
       username,
       email,
       password,
-      is_seller: isSeller,
-      contact_number: contact_number,
+      role,  // ✅ this is the key fix
+      phone_number: contact_number,
       address,
     });
 
-    // Accept both 200 (OK) and 201 (Created) as success
     if (response.status === 200 || response.status === 201) {
-      return response.data; // Return any relevant data from the backend
+      return response.data;
     }
 
-    // Handle unexpected status codes
     throw new Error(response.data?.message || "Unexpected response from server");
   } catch (error) {
-    // Handle errors (e.g., network issues or backend errors)
     throw new Error(error.response?.data?.message || "Registration failed");
   }
 }

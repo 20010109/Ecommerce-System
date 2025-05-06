@@ -12,8 +12,12 @@ function Header() {
   if (token) {
     try {
       const decoded = jwtDecode(token);
-      const isSeller = decoded.is_seller === true;
-      userRole = isSeller ? "seller" : "buyer";
+  
+      // ✅ Extract the role from Hasura JWT claims
+      userRole =
+        decoded["https://hasura.io/jwt/claims"]?.["x-hasura-default-role"];
+  
+      console.log("User role:", userRole);  // Optional debug
     } catch (err) {
       console.error("Failed to decode token:", err);
     }

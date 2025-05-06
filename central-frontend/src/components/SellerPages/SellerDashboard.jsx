@@ -2,8 +2,23 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "./style/SellerDashboard.css";
 import { FaBoxes, FaClipboardList, FaChartLine, FaMoneyBillWave } from "react-icons/fa";
+import { jwtDecode } from "jwt-decode";
 
 const SellerDashboard = () => {
+  // Get token + decode it to fetch the username
+  const token = localStorage.getItem("token");
+  let username = "Seller";
+
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      username = decoded.username || "Seller";
+    } catch (err) {
+      console.error("Failed to decode token:", err);
+    }
+  }
+
+
   // Placeholder data - connect to real data later
   const totalSales = 15230;
   const totalOrders = 48;
@@ -11,7 +26,7 @@ const SellerDashboard = () => {
 
   return (
     <div className="seller-dashboard">
-      <h2 className="dashboard-title">Welcome, Seller!</h2>
+      <h2 className="dashboard-title">Welcome, {username}!</h2>
       <p className="dashboard-subtitle">
         Track your performance, manage your products, and stay updated with your orders.
       </p>

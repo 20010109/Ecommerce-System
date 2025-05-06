@@ -2,7 +2,6 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
-
 const RoleBasedRoute = ({ allowedRoles, children }) => {
   const token = localStorage.getItem("token");
 
@@ -12,8 +11,12 @@ const RoleBasedRoute = ({ allowedRoles, children }) => {
 
   try {
     const decoded = jwtDecode(token);
-    const isSeller = decoded.is_seller === true;
-    const userRole = isSeller ? "seller" : "buyer";
+
+    // ✅ Extract role from Hasura claims
+    const userRole =
+      decoded["https://hasura.io/jwt/claims"]?.["x-hasura-default-role"];
+
+    console.log("User role:", userRole);  // (optional) for debugging
 
     if (!allowedRoles.includes(userRole)) {
       return <Navigate to="/unauthorized" replace />;
