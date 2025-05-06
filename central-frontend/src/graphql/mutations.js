@@ -27,7 +27,7 @@ export const CREATE_PRODUCT = gql`
         base_price
         image
         category
-        listed          # ✅ ensure we return listed status
+        listed     
       }
     }
   }

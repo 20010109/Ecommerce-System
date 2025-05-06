@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./style/Login.css"; // optional custom styles
+import "./style/Login.css"
 import { login } from "../services/authService"; // Backend API call
 import domalogo from "./images/domalogo.png";
 
