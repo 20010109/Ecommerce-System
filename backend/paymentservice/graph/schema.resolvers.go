@@ -9,6 +9,7 @@ import (
 	"database/sql"
 	"fmt"
 	"paymentservice/graph/model"
+	"strconv"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -47,6 +48,15 @@ func (r *mutationResolver) CreatePayment(ctx context.Context, input model.NewPay
 		return nil, fmt.Errorf("insert failed: %v", err)
 	}
 
+	// ✅ Log creation
+	_, err = r.DB.ExecContext(ctx, `
+        INSERT INTO payment_logs (payment_id, status, message)
+        VALUES ($1, $2, $3)
+    `, id, "pending", "Payment created and pending verification")
+	if err != nil {
+		fmt.Printf("Failed to insert payment log: %v\n", err)
+	}
+
 	return &model.Payment{
 		ID:                   fmt.Sprintf("%d", id),
 		OrderID:              input.OrderID,
@@ -60,6 +70,88 @@ func (r *mutationResolver) CreatePayment(ctx context.Context, input model.NewPay
 		CreatedAt:            (*model.Time)(&now),
 		UpdatedAt:            (*model.Time)(&now),
 	}, nil
+}
+
+// ✅ VerifyPayment is the resolver for the verifyPayment field.
+func (r *mutationResolver) VerifyPayment(ctx context.Context, paymentID string) (*model.Payment, error) {
+	now := time.Now()
+
+	// Convert paymentID string to int
+	paymentIDInt, err := strconv.Atoi(paymentID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid payment ID: %v", err)
+	}
+
+	// 1️⃣ Update payment status to "completed"
+	result, err := r.DB.ExecContext(ctx, `
+        UPDATE payments
+        SET payment_status = $1, paid_at = $2, updated_at = $2
+        WHERE id = $3
+    `, "completed", now, paymentIDInt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update payment: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return nil, fmt.Errorf("failed to check affected rows: %v", err)
+	}
+	if rowsAffected == 0 {
+		return nil, fmt.Errorf("payment with ID %d not found", paymentIDInt)
+	}
+
+	// 2️⃣ Insert into payment_logs
+	_, err = r.DB.ExecContext(ctx, `
+        INSERT INTO payment_logs (payment_id, status, message)
+        VALUES ($1, $2, $3)
+    `, paymentIDInt, "completed", "Payment has been verified and marked as completed")
+	if err != nil {
+		fmt.Printf("Failed to insert payment log: %v\n", err)
+	}
+
+	// 3️⃣ Retrieve the updated payment
+	return r.getPaymentByID(ctx, paymentIDInt)
+}
+
+// ✅ RefundPayment is the resolver for the refundPayment field.
+func (r *mutationResolver) RefundPayment(ctx context.Context, paymentID string) (*model.Payment, error) {
+	now := time.Now()
+
+	// Convert paymentID string to int
+	paymentIDInt, err := strconv.Atoi(paymentID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid payment ID: %v", err)
+	}
+
+	// 1️⃣ Update payment status to "refunded"
+	result, err := r.DB.ExecContext(ctx, `
+        UPDATE payments
+        SET payment_status = $1, updated_at = $2
+        WHERE id = $3
+    `, "refunded", now, paymentIDInt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to refund payment: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return nil, fmt.Errorf("failed to check affected rows: %v", err)
+	}
+	if rowsAffected == 0 {
+		return nil, fmt.Errorf("payment with ID %d not found", paymentIDInt)
+	}
+
+	// 2️⃣ Insert log entry
+	_, err = r.DB.ExecContext(ctx, `
+        INSERT INTO payment_logs (payment_id, status, message)
+        VALUES ($1, $2, $3)
+    `, paymentIDInt, "refunded", "Payment has been refunded")
+	if err != nil {
+		fmt.Printf("Failed to insert refund log: %v\n", err)
+	}
+
+	// 3️⃣ Return the updated payment
+	return r.getPaymentByID(ctx, paymentIDInt)
 }
 
 // Payments is the resolver for the payments field.
@@ -114,6 +206,49 @@ func (r *queryResolver) Payments(ctx context.Context) ([]*model.Payment, error) 
 		payments = append(payments, &p)
 	}
 	return payments, nil
+}
+
+// ✅ Helper: Get a single payment by ID (accepts int)
+func (r *mutationResolver) getPaymentByID(ctx context.Context, paymentID int) (*model.Payment, error) {
+	var p model.Payment
+	var paidAt, createdAt, updatedAt sql.NullTime
+	var transactionRef sql.NullString
+	var paymentProvider sql.NullString
+
+	err := r.DB.QueryRowContext(ctx, `
+        SELECT id, order_id, user_id, amount, currency,
+               payment_method, payment_status, transaction_reference,
+               payment_provider, paid_at, created_at, updated_at
+        FROM payments WHERE id = $1
+    `, paymentID).Scan(
+		&p.ID, &p.OrderID, &p.UserID, &p.Amount, &p.Currency,
+		&p.PaymentMethod, &p.PaymentStatus, &transactionRef,
+		&paymentProvider, &paidAt, &createdAt, &updatedAt,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve payment: %v", err)
+	}
+
+	if transactionRef.Valid {
+		p.TransactionReference = &transactionRef.String
+	}
+	if paymentProvider.Valid {
+		p.PaymentProvider = &paymentProvider.String
+	}
+	if paidAt.Valid {
+		t := model.Time(paidAt.Time)
+		p.PaidAt = &t
+	}
+	if createdAt.Valid {
+		t := model.Time(createdAt.Time)
+		p.CreatedAt = &t
+	}
+	if updatedAt.Valid {
+		t := model.Time(updatedAt.Time)
+		p.UpdatedAt = &t
+	}
+
+	return &p, nil
 }
 
 // Mutation returns MutationResolver implementation.

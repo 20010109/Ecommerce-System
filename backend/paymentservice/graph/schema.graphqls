@@ -30,4 +30,6 @@ type Query {
 
 type Mutation {
     createPayment(input: NewPayment!): Payment!
+    verifyPayment(paymentId: ID!): Payment
+    refundPayment(paymentId: ID!): Payment  
 }
