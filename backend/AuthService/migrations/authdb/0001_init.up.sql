@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS users (
     first_name VARCHAR(100),
     last_name VARCHAR(100),
     phone_number VARCHAR(20) UNIQUE,
-    is_verified BOOLEAN DEFAULT FALSE,
     status VARCHAR(20) DEFAULT 'active',
     profile_image_url TEXT,
     address JSONB,
@@ -18,13 +17,6 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS email_verifications (
-    id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token VARCHAR(255) UNIQUE NOT NULL,
-    expires_at TIMESTAMP NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
-);
 
 
 -- Optional: Add indexes

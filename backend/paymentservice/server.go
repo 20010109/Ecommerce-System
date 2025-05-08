@@ -16,7 +16,7 @@ const defaultPort = "8080"
 func main() {
     port := defaultPort
 
-    db, err := sql.Open("postgres", "postgres://postgres:jer@localhost:5432/paymentdb?sslmode=disable")
+    db, err := sql.Open("postgres", "postgres://postgres:password@localhost:5432/paymentdb?sslmode=disable")
     if err != nil {
         log.Fatalf("Failed to connect to DB: %v", err)
     }
