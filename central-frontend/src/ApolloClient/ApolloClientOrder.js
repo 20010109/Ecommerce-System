@@ -3,8 +3,8 @@ import { WebSocketLink } from '@apollo/client/link/ws';
 import { setContext } from '@apollo/client/link/context';
 import { getMainDefinition } from '@apollo/client/utilities';
 
-const HTTP_URL = 'http://localhost:8080/orders/graphql';
-const WS_URL = 'ws://localhost:8080/orders/graphql';
+const HTTP_URL = 'http://localhost:8003/v1/graphql';
+const WS_URL = 'ws://localhost:8003/v1/graphql';
 
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem('token');

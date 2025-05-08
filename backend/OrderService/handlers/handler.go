@@ -13,6 +13,8 @@ import (
 type CreateOrderRequest struct {
     BuyerID         int               `json:"buyer_id"`
     BuyerName       string            `json:"buyer_name"`
+    SellerID         int              `json:"seller_id"`
+    SellerUsername   string           `json:"seller_username"`
     ShippingMethod  string            `json:"shipping_method"`
     ShippingAddress string            `json:"shipping_address"`
     ContactNumber   string            `json:"contact_number"`
@@ -53,6 +55,8 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
     orderData := map[string]interface{}{
         "buyer_id":         req.BuyerID,
         "buyer_name":       req.BuyerName,
+        "seller_id":        req.SellerID,                 // NEW
+        "seller_username":  req.SellerUsername,     // NEW
         "status":           "pending",
         "total_amount":     calculateTotal(req.OrderItems),
         "payment_method":   req.PaymentMethod,
@@ -174,6 +178,8 @@ func GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
         id
         buyer_id
         buyer_name
+        seller_id
+        seller_username
         status
         total_amount
         payment_method

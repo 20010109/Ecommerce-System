@@ -11,7 +11,7 @@ import (
 
 func main() {
     // Initialize the GraphQL client (adjust port if needed)
-    graphql.InitClient("http://localhost:8081/v1/graphql") 
+    graphql.InitClient("http://localhost:8003/v1/graphql") 
 
     r := chi.NewRouter()
 

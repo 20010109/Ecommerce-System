@@ -165,3 +165,13 @@ export const TOGGLE_LISTED_STATUS = gql`
   }
 `;
 
+// Mutation: Update order status
+export const UPDATE_ORDER_STATUS = gql`
+  mutation UpdateOrderStatus($orderId: Int!, $newStatus: String!) {
+    update_orders_by_pk(pk_columns: { id: $orderId }, _set: { status: $newStatus }) {
+      id
+      status
+    }
+  }
+`;
+

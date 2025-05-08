@@ -8,25 +8,25 @@ const SellerOrdersPage = () => {
   const { loading, error, data } = useQuery(GET_ORDERS);
   const navigate = useNavigate();
 
-  if (loading) return <p>Loading orders...</p>;
-  if (error) return <p>Error fetching orders: {error.message}</p>;
+  if (loading) return <p className="seller-orders-loading">Loading orders...</p>;
+  if (error) return <p className="seller-orders-error">Error fetching orders: {error.message}</p>;
 
   const orders = data?.orders || [];
 
   return (
     <div className="seller-orders-container">
-      <h1 className="orders-title">Orders</h1>
+      <h1 className="seller-orders-title">Orders</h1>
 
-      <div className="table-container">
+      <div className="seller-orders-table-container">
         {orders.length > 0 ? (
-          <table className="orders-table">
+          <table className="seller-orders-table">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>Order ID</th>
                 <th>Buyer Name</th>
                 <th>Status</th>
-                <th>Total</th>
-                <th></th>
+                <th>Total Amount</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -38,7 +38,7 @@ const SellerOrdersPage = () => {
                   <td>₱{parseFloat(order.total_amount).toLocaleString()}</td>
                   <td>
                     <button
-                      className="view-button"
+                      className="seller-orders-view-button"
                       onClick={() => navigate(`/seller/orders/${order.id}`)}
                     >
                       VIEW
@@ -49,7 +49,7 @@ const SellerOrdersPage = () => {
             </tbody>
           </table>
         ) : (
-          <p>No orders available.</p>
+          <p className="seller-orders-no-data">No orders available.</p>
         )}
       </div>
     </div>
