@@ -53,6 +53,7 @@ function Header() {
             <>
               <Link to="/dashboard">Dashboard</Link>
               <Link to="/inventory">Inventory</Link>
+              <Link to="/seller/order">Order</Link>
             </>
           )}
 

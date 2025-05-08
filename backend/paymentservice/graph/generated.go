@@ -8,7 +8,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"paymentservice/graph/model"
+	"PaymentService/graph/model"
 	"strconv"
 	"sync"
 	"sync/atomic"

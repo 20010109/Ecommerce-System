@@ -4,14 +4,14 @@ import (
     "database/sql"
     "log"
     "net/http"
-    "paymentservice/graph"
+    "PaymentService/graph"
 
     _ "github.com/lib/pq"
     "github.com/99designs/gqlgen/graphql/handler"
     "github.com/99designs/gqlgen/graphql/playground"
 )
 
-const defaultPort = "8080"
+const defaultPort = "8004"
 
 func main() {
     port := defaultPort
