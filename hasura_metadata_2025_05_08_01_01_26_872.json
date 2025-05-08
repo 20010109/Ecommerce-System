@@ -1,5 +1,5 @@
 {
-  "resource_version": 90,
+  "resource_version": 93,
   "metadata": {
     "version": 3,
     "sources": [
@@ -162,6 +162,32 @@
             ],
             "select_permissions": [
               {
+                "role": "buyer",
+                "permission": {
+                  "columns": [
+                    "listed",
+                    "id",
+                    "seller_id",
+                    "base_price",
+                    "category",
+                    "description",
+                    "image",
+                    "name",
+                    "seller_username",
+                    "sku",
+                    "created_at",
+                    "updated_at"
+                  ],
+                  "filter": {
+                    "listed": {
+                      "_eq": true
+                    }
+                  },
+                  "allow_aggregations": true
+                },
+                "comment": ""
+              },
+              {
                 "role": "seller",
                 "permission": {
                   "columns": [
@@ -259,10 +285,6 @@
               "query": "mutation CreateVariant(\r\n    $productId: Int!\r\n    $variantName: String!\r\n    $size: String!\r\n    $color: String!\r\n    $stockQuantity: Int!\r\n    $image: String!\r\n  ) {\r\n    insert_product_variants(\r\n      objects: {\r\n        product_id: $productId\r\n        variant_name: $variantName\r\n        size: $size\r\n        color: $color\r\n        stock_quantity: $stockQuantity\r\n        image: $image\r\n      }\r\n    ) {\r\n      returning {\r\n        id\r\n        variant_name\r\n        size\r\n        color\r\n        stock_quantity\r\n        image\r\n        sku\r\n      }\r\n    }\r\n  }"
             },
             {
-              "name": "DeleteVariant",
-              "query": "mutation DeleteVariant($id: Int!) {\r\n    delete_product_variants(where: { id: { _eq: $id } }) {\r\n      affected_rows\r\n    }\r\n  }"
-            },
-            {
               "name": "UpdateVariant",
               "query": "mutation UpdateVariant(\r\n    $id: Int!\r\n    $variantName: String\r\n    $size: String\r\n    $color: String\r\n    $stockQuantity: Int\r\n    $image: String!\r\n  ) {\r\n    update_product_variants(\r\n      where: { id: { _eq: $id } }\r\n      _set: {\r\n        variant_name: $variantName\r\n        size: $size\r\n        color: $color\r\n        stock_quantity: $stockQuantity\r\n        image: $image\r\n      }\r\n    ) {\r\n      returning {\r\n        id\r\n        variant_name\r\n        size\r\n        color\r\n        stock_quantity\r\n        image\r\n        sku\r\n      }\r\n    }\r\n  }"
             },
@@ -273,6 +295,10 @@
             {
               "name": "DeleteProduct",
               "query": "mutation DeleteProduct($id: Int!) {\r\n    delete_products(where: { id: { _eq: $id } }) {\r\n      affected_rows\r\n    }\r\n  }"
+            },
+            {
+              "name": "DeleteVariant",
+              "query": "mutation DeleteVariant($id: Int!) {\r\n    delete_product_variants(where: { id: { _eq: $id } }) {\r\n      affected_rows\r\n    }\r\n  }"
             }
           ]
         }
