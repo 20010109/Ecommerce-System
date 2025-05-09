@@ -1,90 +1,178 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import "./common/Header.css";
-import { jwtDecode } from "jwt-decode";
-import { FaShoppingCart } from "react-icons/fa";  // Icon for the logo
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import './common/Header.css';
+import { jwtDecode } from 'jwt-decode';
+import { FaShoppingCart } from 'react-icons/fa';
 
-function Header() {
+export default function Header() {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const [searchInput, setSearchInput] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [profile, setProfile] = useState({
+    username: '',
+    profileImageUrl: ''
+  });
 
+  const token = localStorage.getItem('token');
   let userRole = null;
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        if (!token) return;
+        const res = await fetch('http://localhost:8000/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setProfile({
+            username: data.username,
+            profileImageUrl: data.profile_image_url
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+      }
+    };
+    fetchProfile();
+  }, [token]);
+
+  // Decode user role
   if (token) {
     try {
       const decoded = jwtDecode(token);
-  
-      userRole =
-        decoded["https://hasura.io/jwt/claims"]?.["x-hasura-default-role"];
-  
-      console.log("User role:", userRole);  // Debug: shows buyer/seller/admin
+      userRole = decoded['https://hasura.io/jwt/claims']?.['x-hasura-default-role'];
     } catch (err) {
-      console.error("Failed to decode token:", err);
+      console.error('Failed to decode token:', err);
     }
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");  // Clean up role too if stored
-    navigate("/");
+  const handleMyShopClick = () => {
+    if (userRole === 'seller') {
+      navigate('/dashboard');
+    } else {
+      navigate('/seller/register');
+    }
   };
 
-  const handleMyShopClick = () => {
-    if (userRole === "seller") {
-      navigate("/dashboard");  // 🚀 Seller dashboard
-    } else {
-      navigate("/seller/register");  // 🚀 Register as seller
+  // Live search debounce effect
+  useEffect(() => {
+    if (!searchInput.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const delayDebounce = setTimeout(() => {
+      setIsSearching(true);
+      fetch(`http://localhost:8001/products?name=${encodeURIComponent(searchInput)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setSearchResults(data);
+        })
+        .catch((err) => console.error("Search error:", err))
+        .finally(() => setIsSearching(false));
+    }, 400);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchInput]);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchInput.trim()) {
+      navigate(`/catalog?search=${encodeURIComponent(searchInput.trim())}`);
+      setSearchInput('');
+      setSearchResults([]); // Hide results after submission
     }
   };
 
   return (
     <header className="header">
       <div className="header-container">
-        {/* Logo + Brand */}
         <div className="brand">
           <FaShoppingCart className="brand-icon" />
           <h1 className="header-title">DOMA</h1>
         </div>
 
-        {/* Search bar */}
-        <input type="text" className="search-bar" placeholder="Search products..." />
+        <div className="search-bar-wrapper">
+          <form onSubmit={handleSearchSubmit} className="search-bar-form">
+              <input
+                  type="text"
+                  className="search-bar-input"
+                  placeholder="Search for products..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+              />
+              <button type="submit" className="search-bar-button">
+                  🔍
+              </button>
+          </form>
 
-        {/* Nav links */}
+          {searchResults.length > 0 && (
+              <div className="search-results-dropdown">
+                  {searchResults.map((product) => (
+                      <div
+                          key={product.id}
+                          className="search-result-item"
+                          onClick={() => {
+                              navigate(`/catalog/${product.id}`);
+                              setSearchInput('');
+                              setSearchResults([]);
+                          }}
+                      >
+                          <img
+                              src={product.image}
+                              alt={product.name}
+                              className="search-result-image"
+                          />
+                          <div>
+                              <p className="search-result-name">{product.name}</p>
+                              <p className="search-result-price">${product.base_price}</p>
+                          </div>
+                      </div>
+                  ))}
+              </div>
+            )}
+        </div>
+
         <nav className="navbar">
-          {token && (
+          {userRole === 'buyer' && (
             <>
-              {/* Universal: always visible */}
               <Link to="/catalog">Catalog</Link>
               <Link to="/order">Orders</Link>
-              <Link to="/about">About</Link>
-              <Link to="/profile">Profile</Link>
-
-              {/* Extra tab for sellers */}
-              {userRole === "seller" && (
-                <Link to="/inventory">Inventory</Link>
-              )}
-
-              {/* 🚀 My Shop Button */}
-              <button onClick={handleMyShopClick} className="my-shop-button">
-                My Shop
-              </button>
-
-              <button onClick={handleLogout} className="logout-button">
-                Logout
-              </button>
             </>
           )}
 
-          {/* If no token: fallback (e.g., maybe Login/Register links) */}
-          {!token && (
+          {userRole === 'seller' && (
             <>
-              <Link to="/">Login</Link>
-              <Link to="/register">Register</Link>
+              <Link to="/catalog">Catalog</Link>
+              <Link to="/inventory">Inventory</Link>
+              <Link to="/seller/orders">Orders</Link>
             </>
           )}
+
+          <Link to="/about">About</Link>
+
+          {token && (
+            <button onClick={handleMyShopClick} className="my-shop-button">
+              My Shop
+            </button>
+          )}
+
+          <div
+            className="profile-area"
+            onClick={() => navigate('/profile')}
+            title="View profile"
+          >
+            <img
+              src={profile.profileImageUrl || '/default-profile.png'}
+              alt="Profile"
+              className="profile-image"
+            />
+            <span className="profile-username">{profile.username}</span>
+          </div>
         </nav>
       </div>
     </header>
   );
 }
-
-export default Header;

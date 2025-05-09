@@ -3,24 +3,32 @@ package main
 import (
     "log"
     "net/http"
-    "ProductService/handler"
-    "github.com/gorilla/mux"
-    "github.com/rs/cors"
+
+    "github.com/go-chi/chi/v5"
+    "github.com/go-chi/cors"
+    "ProductService/handlers"
+    "ProductService/redis"
 )
 
 func main() {
-    router := mux.NewRouter()
-    router.HandleFunc("/products", handler.GetAllProducts).Methods("GET")
+    r := chi.NewRouter()
 
-    log.Println("✅ ProductService running on :8081 (with CORS enabled)")
-
-    c := cors.New(cors.Options{
-        AllowedOrigins:   []string{"*"},
-        AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
-        AllowedHeaders:   []string{"Authorization", "Content-Type"},
+    // ✅ Add CORS middleware
+    r.Use(cors.Handler(cors.Options{
+        AllowedOrigins:   []string{"http://localhost:3000"}, // Or use []string{"*"} for all origins (dev only)
+        AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+        AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+        ExposedHeaders:   []string{"Link"},
         AllowCredentials: true,
-    })
+        MaxAge:           300, // Maximum value not ignored by any of major browsers
+    }))
 
-    handler := c.Handler(router)
-    log.Fatal(http.ListenAndServe(":8081", handler))
+    r.Get("/products", handlers.GetProducts)
+	r.Get("/categories", handlers.GetCategories)
+
+
+    go redis.SubscribeToInventoryEvents()
+
+    log.Println("ProductService running on :8001")
+    log.Fatal(http.ListenAndServe(":8001", r))
 }

@@ -21,7 +21,7 @@ type Product struct {
 }
 
 func GetProducts(w http.ResponseWriter, r *http.Request) {
-	req, err := http.NewRequest("GET", "http://localhost:8080/api/rest/products", nil)
+	req, err := http.NewRequest("GET", "http://hasura-inventory:8080/api/rest/products", nil)
 	if err != nil {
 		http.Error(w, "Failed to create request", http.StatusInternalServerError)
 		return
@@ -92,3 +92,51 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(filtered)
 }
+
+func GetCategories(w http.ResponseWriter, r *http.Request) {
+    // Update the link to your Hasura REST API for categories
+    req, err := http.NewRequest("GET", "http://hasura-inventory:8080/api/rest/categories", nil)
+    if err != nil {
+        http.Error(w, "Failed to create request", http.StatusInternalServerError)
+        return
+    }
+    req.Header.Set("x-hasura-admin-secret", "password")
+
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        http.Error(w, "Failed to fetch from InventoryService", http.StatusInternalServerError)
+        return
+    }
+    defer resp.Body.Close()
+
+    // This struct assumes Hasura returns:
+    // { "products": [ { "category": "Shoes" }, { "category": "Clothes" } ... ] }
+    var result struct {
+        Products []struct {
+            Category string `json:"category"`
+        } `json:"products"`
+    }
+
+    if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+        http.Error(w, "Failed to decode InventoryService response", http.StatusInternalServerError)
+        return
+    }
+
+    // Extract unique categories from the result
+    uniqueCategories := []string{}
+    seen := make(map[string]bool)
+    for _, item := range result.Products {
+        if item.Category != "" && !seen[item.Category] {
+            seen[item.Category] = true
+            uniqueCategories = append(uniqueCategories, item.Category)
+        }
+    }
+
+    // Return as { "categories": [ ... ] }
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(map[string]interface{}{
+        "categories": uniqueCategories,
+    })
+}
+

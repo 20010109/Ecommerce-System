@@ -3,8 +3,12 @@
   --color-accent: #FF8225;
   --color-primary: #B43F3F;
   --color-secondary: #173B45;
+  --color-white: #FFFFFF;
 }
 
+/* ======================
+   HEADER BASE STYLING
+========================= */
 
 .header {
   background-color: var(--color-accent);
@@ -19,13 +23,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
   margin: 0 auto;
   padding: 10px 20px;
   flex-wrap: wrap;
 }
 
-/* Brand: Logo + Title */
+/* ======================
+   BRAND SECTION
+========================= */
+
 .brand {
   display: flex;
   align-items: center;
@@ -43,23 +49,107 @@
   margin: 0;
 }
 
-/* Search bar */
-.search-bar {
-  flex-grow: 1;
-  max-width: 400px;
-  padding: 8px 15px;
+/* ======================
+   SEARCH BAR WRAPPER & FORM
+========================= */
+
+.search-bar-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 700px;  /* wider */
+  width: 100%;
+}
+
+.search-bar-form {
+  display: flex;
+  width: 100%;
+  border: 2px solid var(--color-accent);
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+  transition: box-shadow 0.3s ease;
+}
+
+.search-bar-form:focus-within {
+  box-shadow: 0 0 5px rgba(255, 130, 37, 0.5);
+}
+
+.search-bar-input {
+  flex: 1;
+  padding: 12px 15px;
+  font-size: 16px;
   border: none;
-  border-radius: 20px;
   outline: none;
+}
+
+.search-bar-button {
+  padding: 12px 20px;
+  background-color: var(--color-white);
+  color: white;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.search-bar-button:hover {
+  background-color: var(--color-primary);
+}
+
+/* ======================
+   SEARCH RESULTS DROPDOWN
+========================= */
+
+.search-results-dropdown {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  max-height: 350px;
+  overflow-y: auto;
+  background: white;
+  border: 2px solid var(--color-accent);
+  border-top: none;
+  z-index: 999;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-result-item:hover {
+  background: var(--color-bg);
+}
+
+.search-result-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.search-result-name {
+  font-weight: bold;
+  margin: 0;
+}
+
+.search-result-price {
   font-size: 14px;
-  margin: 10px 20px;
+  color: gray;
+  margin: 0;
 }
 
-.search-bar:focus {
-  border: 2px solid var(--color-secondary);
-}
+/* ======================
+   NAVBAR LINKS & BUTTONS
+========================= */
 
-/* Navbar links + logout */
 .navbar {
   display: flex;
   align-items: center;
@@ -81,35 +171,68 @@
   color: var(--color-secondary);
 }
 
-.logout-button {
+.my-shop-button {
   background: transparent;
-  border: 1px solid white;
+  border: none;
   color: white;
-  font-size: 14px;
+  font-size: 16px;
   padding: 6px 10px;
   border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: color 0.3s, background-color 0.3s;
 }
 
-.logout-button:hover {
-  background-color: white;
+.my-shop-button:hover {
+  background-color: var(--color-bg);
   color: var(--color-secondary);
 }
 
-/* Responsive */
+/* ======================
+   PROFILE AREA
+========================= */
+
+.profile-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.profile-area:hover {
+  background-color: var(--color-bg);
+}
+
+.profile-image {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-username {
+  color: white;
+  font-size: 14px;
+}
+
+/* ======================
+   RESPONSIVE DESIGN
+========================= */
+
 @media (max-width: 768px) {
   .header-container {
-      flex-direction: column;
-      align-items: stretch;
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .search-bar {
-      width: 100%;
-      margin: 10px 0;
+  .search-bar-wrapper {
+    width: 100%;
+    margin: 10px 0;
   }
 
   .navbar {
-      justify-content: center;
+    justify-content: center;
   }
 }

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { applySeller } from "../../api/authService";
-//import "./RegisterSeller.css";  // Optional for styling
+import "./style/RegisterSeller.css";  // Optional for styling
 
 function RegisterSeller() {
   const [shopName, setShopName] = useState("");

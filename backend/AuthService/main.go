@@ -44,7 +44,7 @@ func main() {
 
     // Profile routes
 	mux.HandleFunc("/me", handlers.MeHandler)
-	mux.HandleFunc("/profile/update", handlers.UpdateProfileHandler)
+    mux.HandleFunc("/profile/update", handlers.UpdateProfileHandler)
 
     // Register a Seller
     mux.HandleFunc("/apply-seller", handlers.ApplySellerHandler)

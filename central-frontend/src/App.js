@@ -1,8 +1,9 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { ApolloProvider } from "@apollo/client";
-import { client as inventoryClient } from "./ApolloClient/ApolloClientInventory";
-import { client as orderClient } from "./ApolloClient/ApolloClientOrder";
+import inventoryClient from "./ApolloClient/ApolloClientInventory";
+import orderClient from "./ApolloClient/ApolloClientOrder";
+import userClient from './ApolloClient/ApolloClientUser';
 
 // Components
 import Header from "./components/Header";
@@ -10,7 +11,6 @@ import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
 import AboutPage from "./components/About";
 import ProfilePage from "./components/ProfilePage";
-
 
 // Buyer Pages
 import BuyerProductCatalog from "./components/BuyerPages/BuyerProductCatalog";
@@ -22,7 +22,6 @@ import SellerDashboard from "./components/SellerPages/SellerDashboard";
 import SellerOrdersPage from "./components/SellerPages/SellerOrdersPage";
 import SellerOrderDetail from "./components/SellerPages/SellerOrderDetail";
 import RegisterSeller from "./components/SellerPages/RegisterSeller";
-
 
 // Routes
 import PrivateRoute from "./routes/PrivateRoute";
@@ -38,7 +37,11 @@ function AppContent() {
   return (
     <>
       {/* Conditionally hide the Header */}
-      {!hideHeaderPaths.includes(location.pathname) && <Header />}
+      {!hideHeaderPaths.includes(location.pathname) && (
+        <ApolloProvider client={userClient}>
+          <Header />
+        </ApolloProvider>
+      )}
 
       <Routes>
         {/* Public routes */}
@@ -100,7 +103,7 @@ function AppContent() {
           path="/catalog"
           element={
             <ApolloProvider client={inventoryClient}>
-                <BuyerProductCatalog />
+              <BuyerProductCatalog />
             </ApolloProvider>
           }
         />
@@ -108,7 +111,19 @@ function AppContent() {
           path="/catalog/:id"
           element={
             <ApolloProvider client={inventoryClient}>
-                <BuyerProductDetails />
+              <BuyerProductDetails />
+            </ApolloProvider>
+          }
+        />
+
+        {/* Profile Page wrapped with UserApolloClient */}
+        <Route
+          path="/profile"
+          element={
+            <ApolloProvider client={userClient}>
+              <PrivateRoute>
+                <ProfilePage />
+              </PrivateRoute>
             </ApolloProvider>
           }
         />
@@ -123,15 +138,6 @@ function AppContent() {
           }
         />
 
-        <Route
-          path="/profile"
-          element={
-            <PrivateRoute>
-              <ProfilePage />
-            </PrivateRoute>
-          }
-        />
-
         {/* Unauthorized fallback */}
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
       </Routes>
@@ -141,11 +147,9 @@ function AppContent() {
 
 function App() {
   return (
-    <ApolloProvider client={inventoryClient}>  {/* Root ApolloProvider for Inventory Client */}
-      <Router>
-        <AppContent />
-      </Router>
-    </ApolloProvider>
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 

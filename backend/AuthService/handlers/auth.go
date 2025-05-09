@@ -47,8 +47,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
         LastName        string                 `json:"last_name,omitempty"`
         PhoneNumber     string                 `json:"phone_number,omitempty"`
         Address         map[string]interface{} `json:"address,omitempty"`
-        BirthDate       string                 `json:"birth_date,omitempty"`  // YYYY-MM-DD
+        BirthDate       string                 `json:"birth_date,omitempty"`
         ProfileImageURL string                 `json:"profile_image_url,omitempty"`
+        Metadata        map[string]interface{} `json:"metadata,omitempty"` // optional metadata
     }
 
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -59,6 +60,12 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
     if req.Username == "" || req.Email == "" || req.Password == "" {
         http.Error(w, "Username, email, and password are required", http.StatusBadRequest)
         return
+    }
+
+    // Set role: fallback to buyer if empty
+    role := req.Role
+    if role == "" || (role != "buyer" && role != "seller" && role != "admin") {
+        role = "buyer"
     }
 
     hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
@@ -76,6 +83,17 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
         }
     }
 
+    var metadataJSON []byte
+    if req.Metadata != nil {
+        metadataJSON, err = json.Marshal(req.Metadata)
+        if err != nil {
+            http.Error(w, "Invalid metadata format", http.StatusBadRequest)
+            return
+        }
+    } else {
+        metadataJSON = []byte(`{}`)
+    }
+
     var birthDate *time.Time
     if req.BirthDate != "" {
         parsedDate, err := time.Parse("2006-01-02", req.BirthDate)
@@ -89,19 +107,21 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
     _, err = db.Exec(
         context.Background(),
         `INSERT INTO users 
-        (username, email, password, role, first_name, last_name, phone_number, address, birth_date, profile_image_url, created_at)
-        VALUES ($1, $2, $3, 'buyer', $4, $5, $6, $7, $8, $9, NOW())`,
+        (username, email, password, role, first_name, last_name, phone_number, address, birth_date, profile_image_url, metadata, shop_name, status, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'none', 'active', NOW())`,
         req.Username,
         req.Email,
         string(hashedPassword),
+        role,
         req.FirstName,
         req.LastName,
         req.PhoneNumber,
         addressJSON,
         birthDate,
         req.ProfileImageURL,
+        metadataJSON,
     )
-    
+
     if err != nil {
         log.Println("DB Exec error:", err)
         if strings.Contains(err.Error(), "duplicate key") {
@@ -118,6 +138,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
         "message": "User registered successfully. You can now log in.",
     })
 }
+
 
 
 
@@ -308,39 +329,58 @@ func extractUserIDFromToken(authHeader string) (int, error) {
 
 // ==================== GET PROFILE ====================
 func MeHandler(w http.ResponseWriter, r *http.Request) {
-	userID, err := extractUserIDFromToken(r.Header.Get("Authorization"))
-	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+    userID, err := extractUserIDFromToken(r.Header.Get("Authorization"))
+    if err != nil {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
 
-	fmt.Printf("🔍 Extracted user ID from token: %d\n", userID)
+    fmt.Printf("🔍 Extracted user ID from token: %d\n", userID)
 
-	var user struct {
-		Username        string `json:"username"`
-		FirstName       string `json:"first_name"`
-		Email           string `json:"email"`
-		PhoneNumber     string `json:"phone_number"`
-		ShopName        string `json:"shop_name"`
-		Gender          string `json:"gender"`
-		BirthDate       string `json:"birth_date"`
-		ProfileImageURL string `json:"profile_image_url"`
-	}
+    var user struct {
+        ID              int             `json:"id"`
+        Username        string          `json:"username"`
+        Email           string          `json:"email"`
+        FirstName       string          `json:"first_name"`
+        LastName        string          `json:"last_name"`
+        PhoneNumber     string          `json:"phone_number"`
+        ShopName        string          `json:"shop_name"`
+        Role            string          `json:"role"`
+        ProfileImageURL string          `json:"profile_image_url"`
+        Address         json.RawMessage `json:"address"` // as JSONB
+        CreatedAt       time.Time       `json:"created_at"`
+    }
 
-	err = db.QueryRow(context.Background(), `
-        SELECT username, first_name, email, phone_number, shop_name, gender, birth_date, profile_image_url
-        FROM users WHERE id = $1
-    `, userID).Scan(&user.Username, &user.FirstName, &user.Email, &user.PhoneNumber,
-		&user.ShopName, &user.Gender, &user.BirthDate, &user.ProfileImageURL)
+    query := `
+        SELECT id, username, email, first_name, last_name, phone_number, shop_name, role, profile_image_url, address, created_at
+        FROM users
+        WHERE id = $1
+    `
 
-	if err != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
-		return
-	}
+    err = db.QueryRow(context.Background(), query, userID).Scan(
+        &user.ID,
+        &user.Username,
+        &user.Email,
+        &user.FirstName,
+        &user.LastName,
+        &user.PhoneNumber,
+        &user.ShopName,
+        &user.Role,
+        &user.ProfileImageURL,
+        &user.Address,
+        &user.CreatedAt,
+    )
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+    if err != nil {
+        log.Println("DB error fetching user:", err)
+        http.Error(w, "User not found", http.StatusNotFound)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(user)
 }
+
 
 // ==================== UPDATE PROFILE ====================
 func UpdateProfileHandler(w http.ResponseWriter, r *http.Request) {
@@ -350,33 +390,108 @@ func UpdateProfileHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    var req struct {
-        FirstName       string `json:"first_name"`
-        PhoneNumber     string `json:"phone_number"`
-        ShopName        string `json:"shop_name"`
-        Gender          string `json:"gender"`
-        BirthDate       string `json:"birth_date"` // format: YYYY-MM-DD
-        ProfileImageURL string `json:"profile_image_url"`
-    }
-
-    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-        http.Error(w, "Invalid body", http.StatusBadRequest)
+    // First, fetch the user's current role (to check if seller)
+    var currentRole string
+    err = db.QueryRow(context.Background(), `
+        SELECT role FROM users WHERE id = $1
+    `, userID).Scan(&currentRole)
+    if err != nil {
+        log.Println("DB error (fetch role):", err)
+        http.Error(w, "Failed to fetch user role", http.StatusInternalServerError)
         return
     }
 
-    _, err = db.Exec(context.Background(), `
-        UPDATE users
-        SET first_name=$1, phone_number=$2, shop_name=$3, gender=$4, birth_date=$5, profile_image_url=$6, updated_at=NOW()
-        WHERE id=$7
-    `, req.FirstName, req.PhoneNumber, req.ShopName, req.Gender, req.BirthDate, req.ProfileImageURL, userID)
+    // Parse the request body
+    var req struct {
+        Username        string                 `json:"username"`
+        FirstName       string                 `json:"first_name"`
+        LastName        string                 `json:"last_name"`
+        PhoneNumber     string                 `json:"phone_number"`
+        ProfileImageURL string                 `json:"profile_image_url"`
+        ShopName        string                 `json:"shop_name,omitempty"`
+        Address         map[string]interface{} `json:"address"`
+    }
 
+    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        http.Error(w, "Invalid request body", http.StatusBadRequest)
+        return
+    }
+
+    // Convert address map to JSONB
+    var addressJSON []byte
+    if req.Address != nil {
+        addressJSON, err = json.Marshal(req.Address)
+        if err != nil {
+            http.Error(w, "Invalid address format", http.StatusBadRequest)
+            return
+        }
+    }
+
+    // Build dynamic query
+    query := `UPDATE users SET `
+    args := []interface{}{}
+    setParts := []string{}
+    i := 1
+
+    if req.Username != "" {
+        setParts = append(setParts, fmt.Sprintf("username=$%d", i))
+        args = append(args, req.Username)
+        i++
+    }
+    if req.FirstName != "" {
+        setParts = append(setParts, fmt.Sprintf("first_name=$%d", i))
+        args = append(args, req.FirstName)
+        i++
+    }
+    if req.LastName != "" {
+        setParts = append(setParts, fmt.Sprintf("last_name=$%d", i))
+        args = append(args, req.LastName)
+        i++
+    }
+    if req.PhoneNumber != "" {
+        setParts = append(setParts, fmt.Sprintf("phone_number=$%d", i))
+        args = append(args, req.PhoneNumber)
+        i++
+    }
+    if req.ProfileImageURL != "" {
+        setParts = append(setParts, fmt.Sprintf("profile_image_url=$%d", i))
+        args = append(args, req.ProfileImageURL)
+        i++
+    }
+    // Only update shop_name if user is seller
+    if currentRole == "seller" && req.ShopName != "" {
+        setParts = append(setParts, fmt.Sprintf("shop_name=$%d", i))
+        args = append(args, req.ShopName)
+        i++
+    }
+    // Always allow address update if provided
+    if req.Address != nil {
+        setParts = append(setParts, fmt.Sprintf("address=$%d", i))
+        args = append(args, addressJSON)
+        i++
+    }
+
+    // Always update updated_at
+    setParts = append(setParts, fmt.Sprintf("updated_at=NOW()"))
+
+    // Finalize query
+    query += strings.Join(setParts, ", ")
+    query += fmt.Sprintf(" WHERE id=$%d", i)
+    args = append(args, userID)
+
+    // Execute
+    _, err = db.Exec(context.Background(), query, args...)
     if err != nil {
+        log.Println("DB error (update):", err)
         http.Error(w, "Failed to update profile", http.StatusInternalServerError)
         return
     }
 
+    // ✅ Response
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(map[string]string{"message": "Profile updated successfully"})
 }
+
+
 
 

@@ -1,0 +1,305 @@
+:root {
+    --color-bg: #F8EDED;
+    --color-accent: #FF8225;
+    --color-primary: #B43F3F;
+    --color-secondary: #173B45;
+    --color-white: #FFFFFF;
+  }
+  
+  /* Container */
+  .profile-container {
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    background-color: var(--color-bg);
+  }
+  
+  /* Profile Card */
+  .profile-card {
+    background-color: var(--color-white);
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 100%;
+    max-width: 1000px; /* ✅ Widened */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+  
+  /* Left Column (Image + Basic Info) */
+  .profile-left {
+    flex: 1 1 300px;
+    text-align: center;
+    border-right: 1px solid #eee;
+    padding-right: 20px;
+  }
+  
+  .profile-image-large {
+    width: 160px;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid var(--color-accent);
+    margin-bottom: 15px;
+  }
+  
+  .profile-basic {
+    margin-top: 10px;
+  }
+  
+  .profile-basic p {
+    margin: 6px 0;
+    color: var(--color-secondary);
+    font-size: 16px;
+  }
+  
+  /* Right Column (Details) */
+  .profile-right {
+    flex: 2 1 600px;
+    padding-left: 20px;
+  }
+  
+  .profile-title {
+    color: var(--color-primary);
+    font-size: 26px;
+    margin-bottom: 10px;
+  }
+  
+  .profile-section {
+    margin-bottom: 20px;
+  }
+  
+  .profile-section h4 {
+    color: var(--color-primary);
+    margin-bottom: 10px;
+    font-size: 18px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+  }
+  
+  .profile-section p,
+  .profile-section li {
+    font-size: 15px;
+    margin: 5px 0;
+    color: var(--color-secondary);
+  }
+  
+  /* Buttons */
+  .button-row {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .edit-button,
+  .logout-button-profile {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .edit-button {
+    background-color: var(--color-accent);
+    color: var(--color-white);
+  }
+  
+  .edit-button:hover {
+    background-color: var(--color-primary);
+  }
+  
+  .logout-button-profile {
+    background-color: transparent;
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+  }
+  
+  .logout-button-profile:hover {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+  }
+  
+  /* Modal (same as before) */
+  /* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+  
+  /* Modal Content */
+  .modal-content {
+    background: var(--color-white);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 550px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.3s ease;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Fancy Header Band */
+  .modal-header {
+    background-color: var(--color-accent);
+    padding: 15px 20px;
+    color: var(--color-white);
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  /* Form Styling */
+  .profile-form {
+    padding: 20px 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+  }
+  
+  /* Section Divider */
+  .form-section-title {
+    margin-top: 10px;
+    font-size: 16px;
+    color: var(--color-primary);
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+  }
+  
+  /* Form Groups */
+  .form-group label {
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: var(--color-secondary);
+  }
+  
+  .form-group input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+  
+  .form-group input:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 5px rgba(255, 130, 37, 0.5);
+    outline: none;
+  }
+  
+  /* Modal Buttons */
+  .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 15px 25px 20px;
+    border-top: 1px solid #eee;
+    background-color: #fafafa;
+  }
+  
+  .cancel-button,
+  .save-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+  }
+  
+  /* Cancel Button */
+  .cancel-button {
+    background-color: #ddd;
+    color: var(--color-secondary);
+  }
+  
+  .cancel-button:hover {
+    background-color: #bbb;
+  }
+  
+  /* Save Button */
+  .save-button {
+    background-color: var(--color-accent);
+    color: var(--color-white);
+  }
+  
+  .save-button:hover {
+    background-color: var(--color-primary);
+  }
+  
+  /* Animation */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  
+  
+  /* Form & Modal Buttons (same as before) */
+  .profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .form-group label {
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: var(--color-secondary);
+  }
+  
+  .form-group input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border 0.3s ease;
+  }
+  
+  .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .cancel-button,
+  .save-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .cancel-button {
+    background-color: #ddd;
+    color: var(--color-secondary);
+  }
+  
+  .save-button {
+    background-color: var(--color-accent);
+    color: var(--color-white);
+  }
+  
+  .save-button:hover {
+    background-color: var(--color-primary);
+  }
+  
