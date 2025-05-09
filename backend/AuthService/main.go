@@ -37,8 +37,17 @@ func main() {
     }
 
     mux := http.NewServeMux()
+
+	// Auth routes
     mux.HandleFunc("/register", handlers.RegisterHandler)
     mux.HandleFunc("/login", handlers.LoginHandler)
+
+    // Profile routes
+	mux.HandleFunc("/me", handlers.MeHandler)
+	mux.HandleFunc("/profile/update", handlers.UpdateProfileHandler)
+
+    // Register a Seller
+    mux.HandleFunc("/apply-seller", handlers.ApplySellerHandler)
 
     handlerWithCORS := enableCORS(loggingMiddleware(mux))
 

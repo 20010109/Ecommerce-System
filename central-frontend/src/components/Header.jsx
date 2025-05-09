@@ -13,11 +13,10 @@ function Header() {
     try {
       const decoded = jwtDecode(token);
   
-      // ✅ Extract the role from Hasura JWT claims
       userRole =
         decoded["https://hasura.io/jwt/claims"]?.["x-hasura-default-role"];
   
-      console.log("User role:", userRole);  // Optional debug
+      console.log("User role:", userRole);  // Debug: shows buyer/seller/admin
     } catch (err) {
       console.error("Failed to decode token:", err);
     }
@@ -25,7 +24,16 @@ function Header() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("role");  // Clean up role too if stored
     navigate("/");
+  };
+
+  const handleMyShopClick = () => {
+    if (userRole === "seller") {
+      navigate("/dashboard");  // 🚀 Seller dashboard
+    } else {
+      navigate("/seller/register");  // 🚀 Register as seller
+    }
   };
 
   return (
@@ -42,28 +50,36 @@ function Header() {
 
         {/* Nav links */}
         <nav className="navbar">
-          {userRole === "buyer" && (
-            <>
-              <Link to="/catalog">Catalog</Link>
-              <Link to="/order">Order</Link>
-            </>
-          )}
-
-          {userRole === "seller" && (
-            <>
-              <Link to="/dashboard">Dashboard</Link>
-              <Link to="/inventory">Inventory</Link>
-              <Link to="/seller/order">Order</Link>
-            </>
-          )}
-
-          <Link to="/about">About</Link>
-          <Link to="/profile">Profile</Link>
-
           {token && (
-            <button onClick={handleLogout} className="logout-button">
-              Logout
-            </button>
+            <>
+              {/* Universal: always visible */}
+              <Link to="/catalog">Catalog</Link>
+              <Link to="/order">Orders</Link>
+              <Link to="/about">About</Link>
+              <Link to="/profile">Profile</Link>
+
+              {/* Extra tab for sellers */}
+              {userRole === "seller" && (
+                <Link to="/inventory">Inventory</Link>
+              )}
+
+              {/* 🚀 My Shop Button */}
+              <button onClick={handleMyShopClick} className="my-shop-button">
+                My Shop
+              </button>
+
+              <button onClick={handleLogout} className="logout-button">
+                Logout
+              </button>
+            </>
+          )}
+
+          {/* If no token: fallback (e.g., maybe Login/Register links) */}
+          {!token && (
+            <>
+              <Link to="/">Login</Link>
+              <Link to="/register">Register</Link>
+            </>
           )}
         </nav>
       </div>

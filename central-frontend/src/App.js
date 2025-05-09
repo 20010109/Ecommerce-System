@@ -9,16 +9,20 @@ import Header from "./components/Header";
 import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
 import AboutPage from "./components/About";
+import ProfilePage from "./components/ProfilePage";
 
-// Buyer Pages (REST-based)
+
+// Buyer Pages
 import BuyerProductCatalog from "./components/BuyerPages/BuyerProductCatalog";
-import BuyerProductDetails from "./components/BuyerPages/BuyerProductDetail";
+import BuyerProductDetails from "./components/BuyerPages/BuyerProductDetails";
 
-// Seller Pages (still Apollo-based)
+// Seller Pages
 import SellerInventory from "./components/SellerPages/SellerInventory";
 import SellerDashboard from "./components/SellerPages/SellerDashboard";
 import SellerOrdersPage from "./components/SellerPages/SellerOrdersPage";
 import SellerOrderDetail from "./components/SellerPages/SellerOrderDetail";
+import RegisterSeller from "./components/SellerPages/RegisterSeller";
+
 
 // Routes
 import PrivateRoute from "./routes/PrivateRoute";
@@ -43,10 +47,18 @@ function AppContent() {
 
         {/* Seller-only routes */}
         <Route
+          path="/seller/register"
+          element={
+            <PrivateRoute>
+              <RegisterSeller />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/dashboard"
           element={
             <ApolloProvider client={inventoryClient}>
-              <RoleBasedRoute allowedRoles={['seller']}>
+              <RoleBasedRoute allowedRoles={["seller"]}>
                 <SellerDashboard />
               </RoleBasedRoute>
             </ApolloProvider>
@@ -56,7 +68,7 @@ function AppContent() {
           path="/inventory"
           element={
             <ApolloProvider client={inventoryClient}>
-              <RoleBasedRoute allowedRoles={['seller']}>
+              <RoleBasedRoute allowedRoles={["seller"]}>
                 <SellerInventory />
               </RoleBasedRoute>
             </ApolloProvider>
@@ -66,7 +78,7 @@ function AppContent() {
           path="/seller/orders"
           element={
             <ApolloProvider client={orderClient}>
-              <RoleBasedRoute allowedRoles={['seller']}>
+              <RoleBasedRoute allowedRoles={["seller"]}>
                 <SellerOrdersPage />
               </RoleBasedRoute>
             </ApolloProvider>
@@ -76,36 +88,28 @@ function AppContent() {
           path="/seller/orders/:orderId"
           element={
             <ApolloProvider client={orderClient}>
-              <RoleBasedRoute allowedRoles={['seller']}>
+              <RoleBasedRoute allowedRoles={["seller"]}>
                 <SellerOrderDetail />
               </RoleBasedRoute>
             </ApolloProvider>
           }
         />
-        {/* <Route
-          path="/seller/orders/:orderId"
-          element={
-            <RoleBasedRoute allowedRoles={['seller']}>
-              <SellerOrderDetail />
-            </RoleBasedRoute>
-          }
-        /> */}
 
-        {/* Buyer-only routes (REST-based) */}
+        {/* Buyer-only routes */}
         <Route
           path="/catalog"
           element={
-            <RoleBasedRoute allowedRoles={['buyer']}>
-              <BuyerProductCatalog />
-            </RoleBasedRoute>
+            <ApolloProvider client={inventoryClient}>
+                <BuyerProductCatalog />
+            </ApolloProvider>
           }
         />
         <Route
           path="/catalog/:id"
           element={
-            <RoleBasedRoute allowedRoles={['buyer']}>
-              <BuyerProductDetails />
-            </RoleBasedRoute>
+            <ApolloProvider client={inventoryClient}>
+                <BuyerProductDetails />
+            </ApolloProvider>
           }
         />
 
@@ -119,6 +123,15 @@ function AppContent() {
           }
         />
 
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <ProfilePage />
+            </PrivateRoute>
+          }
+        />
+
         {/* Unauthorized fallback */}
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
       </Routes>
@@ -128,9 +141,11 @@ function AppContent() {
 
 function App() {
   return (
+    <ApolloProvider client={inventoryClient}>  {/* Root ApolloProvider for Inventory Client */}
       <Router>
         <AppContent />
       </Router>
+    </ApolloProvider>
   );
 }
 

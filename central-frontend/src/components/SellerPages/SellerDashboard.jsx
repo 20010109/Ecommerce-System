@@ -5,14 +5,14 @@ import { FaBoxes, FaClipboardList, FaChartLine, FaMoneyBillWave } from "react-ic
 import { jwtDecode } from "jwt-decode";
 
 const SellerDashboard = () => {
-  // Get token + decode it to fetch the username
+  // Get token + decode it to fetch the shopname
   const token = localStorage.getItem("token");
-  let username = "Seller";
+  let shopname = "Seller";
 
   if (token) {
     try {
       const decoded = jwtDecode(token);
-      username = decoded.username || "Seller";
+      shopname = decoded.shop_name || "Seller";
     } catch (err) {
       console.error("Failed to decode token:", err);
     }
@@ -26,7 +26,7 @@ const SellerDashboard = () => {
 
   return (
     <div className="seller-dashboard">
-      <h2 className="dashboard-title">Welcome, {username}!</h2>
+      <h2 className="dashboard-title">Welcome, {shopname}!</h2>
       <p className="dashboard-subtitle">
         Track your performance, manage your products, and stay updated with your orders.
       </p>

@@ -14,6 +14,7 @@ function Register() {
     address: "",
     isSeller: false,
     hasAgreed: false,
+    birthDate: "",
   });
 
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ function Register() {
       address,
       isSeller,
       hasAgreed,
+      birthDate,
     } = formData;
 
     if (!username.trim()) {
@@ -75,17 +77,22 @@ function Register() {
       return;
     }
 
-    // 👇 Map isSeller to role
     const role = isSeller ? "seller" : "buyer";
-
-    // 👇 Convert address string to JSON (wrap as full_address)
     const addressObj = {
       full_address: address,
     };
 
     try {
-      await register(username, email, password, role, contactNumber, addressObj);
-      alert("Registration successful! You can now log in.");  // ✅ UPDATED
+      await register(
+        username,
+        email,
+        password,
+        role,
+        contactNumber,
+        addressObj,
+        birthDate
+      );
+      alert("Registration successful! You can now log in.");
       navigate("/");
     } catch (error) {
       alert(error.message || "Registration failed. Please try again.");
@@ -102,6 +109,7 @@ function Register() {
         />
         <h1 className="register-title">Register</h1>
         <form onSubmit={handleSubmit} className="register-form">
+          <label className="register-label">Username</label>
           <input
             type="text"
             name="username"
@@ -111,6 +119,7 @@ function Register() {
             className="register-input"
             required
           />
+          <label className="register-label">Email</label>
           <input
             type="email"
             name="email"
@@ -120,6 +129,7 @@ function Register() {
             className="register-input"
             required
           />
+          <label className="register-label">Password</label>
           <input
             type="password"
             name="password"
@@ -129,6 +139,7 @@ function Register() {
             className="register-input"
             required
           />
+          <label className="register-label">Confirm Password</label>
           <input
             type="password"
             name="confirmPassword"
@@ -138,6 +149,7 @@ function Register() {
             className="register-input"
             required
           />
+          <label className="register-label">Contact Number</label>
           <input
             type="text"
             name="contactNumber"
@@ -147,6 +159,7 @@ function Register() {
             className="register-input"
             required
           />
+          <label className="register-label">Address</label>
           <input
             type="text"
             name="address"
@@ -155,6 +168,15 @@ function Register() {
             onChange={handleChange}
             className="register-input"
             required
+          />
+          <label className="register-label">Birthdate</label>
+          <input
+            type="date"
+            name="birthDate"
+            placeholder="Birth Date (optional)"
+            value={formData.birthDate}
+            onChange={handleChange}
+            className="register-input"
           />
           <div className="checkbox-group">
             <label className="checkbox-label">
