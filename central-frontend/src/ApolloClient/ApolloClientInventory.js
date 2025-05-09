@@ -45,7 +45,10 @@ const splitLink = split(
   authLink.concat(httpLink)
 );
 
-export const client = new ApolloClient({
+const inventoryClient = new ApolloClient({
   link: splitLink,
   cache: new InMemoryCache(),
 });
+
+
+export default inventoryClient;

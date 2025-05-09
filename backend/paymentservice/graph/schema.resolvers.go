@@ -8,7 +8,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"paymentservice/graph/model"
+	"PaymentService/graph/model"
 	"strconv"
 	"time"
 

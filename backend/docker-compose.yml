@@ -1,6 +1,27 @@
 version: '3.8'
 
+# localhost:8000 Auth Service
+# localhost:8001 Product Service
+# localhost:8002 Inventory Service
+# localhost:8003 Order Service
+# localhost:8004 Payment Service
+
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   auth-service:
     build: ./AuthService
     ports:
@@ -9,7 +30,12 @@ services:
       DB_URL: postgres://postgres:password@host.docker.internal:5432/authdb
       JWT_SECRET: doma-ecommerce-system-jwt-secret-key
 
-  hasura-inventory: 
+  product-service:
+    build: ./ProductService
+    ports:
+      - "8001:8001"
+
+  hasura-inventory:
     image: hasura/graphql-engine:latest
     ports:
       - "8002:8080"
@@ -29,6 +55,25 @@ services:
       HASURA_GRAPHQL_ADMIN_SECRET: password
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
 
+  payment-service:
+    build: ./PaymentService
+    ports:
+      - "8004:8004"
+    environment:
+      DB_URL: postgres://postgres:password@host.docker.internal:5432/paymentdb
+    depends_on:
+      - rabbitmq
+
+  hasura-auth:
+    image: hasura/graphql-engine:latest
+    ports:
+      - "8005:8080"
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:password@host.docker.internal:5432/authdb
+      HASURA_GRAPHQL_JWT_SECRET: '{"type":"HS256", "key": "doma-ecommerce-system-jwt-secret-key"}'
+      HASURA_GRAPHQL_ADMIN_SECRET: password
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+  
   api-gateway:
     image: nginx:latest
     ports:

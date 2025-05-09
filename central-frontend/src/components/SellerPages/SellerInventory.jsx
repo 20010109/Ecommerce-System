@@ -14,6 +14,7 @@ import {
   SUBSCRIBE_TO_NEW_PRODUCTS,
   SUBSCRIBE_TO_NEW_VARIANTS,
 } from '../../graphql/subscriptions';
+import { jwtDecode } from "jwt-decode";
 import "./style/SellerInventory.css";
 
 Modal.setAppElement('#root');
@@ -218,11 +219,23 @@ const Inventory = () => {
     setSelectedProduct(null);
     setIsEditingProduct(false);
   };
+
+  const token = localStorage.getItem("token");
+  let shopname = "Seller";
+
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      shopname = decoded.shop_name || "Seller";
+    } catch (err) {
+      console.error("Failed to decode token:", err);
+    }
+  }
   
   return (
     <div className="sellerinv-inventory-container">
       <div className="sellerinv-inventory-header">
-        <h1 className="sellerinv-inventory-title">Inventory Management</h1>
+        <h1 className="sellerinv-inventory-title">{shopname}'s Inventory</h1>
         <button
           className="sellerinv-btn sellerinv-btn-add-product"
           onClick={() => setProductModalOpen(true)}

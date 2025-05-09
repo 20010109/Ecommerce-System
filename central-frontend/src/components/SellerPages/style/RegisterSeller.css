@@ -1,0 +1,75 @@
+:root {
+    --color-bg: #F8EDED;
+    --color-accent: #FF8225;
+    --color-primary: #B43F3F;
+    --color-secondary: #173B45;
+    --color-white: #FFFFFF;
+  }
+  
+  .register-seller-container {
+    max-width: 450px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: var(--color-bg);
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .register-seller-container h2 {
+    color: var(--color-primary);
+    margin-bottom: 10px;
+  }
+  
+  .register-seller-container p {
+    color: var(--color-secondary);
+    margin-bottom: 20px;
+    font-size: 16px;
+  }
+  
+  .register-seller-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .register-seller-input {
+    padding: 12px 15px;
+    font-size: 16px;
+    border: 2px solid var(--color-accent);
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    outline: none;
+  }
+  
+  .register-seller-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 5px rgba(255, 130, 37, 0.5);
+  }
+  
+  .register-seller-button {
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    background-color: var(--color-accent);
+    color: var(--color-white);
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  
+  .register-seller-button:hover {
+    background-color: var(--color-primary);
+    transform: translateY(-2px);
+  }
+  
+  .success-message {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+  }
+  

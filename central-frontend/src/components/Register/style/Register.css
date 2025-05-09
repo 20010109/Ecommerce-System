@@ -45,6 +45,13 @@
     margin-bottom: 30px;
 }
 
+.register-label{
+    display: flex;
+    text-align: left;
+    width: 100%;
+    margin: 0px 20px 5px 0px;
+}
+
 .register-input {
     width: 100%;
     padding: 12px 15px;
@@ -80,6 +87,7 @@
 }
 
 .register-button {
+    margin-top: 20px;
     padding: 12px;
     background-color: var(--color-accent);
     color: #fff;
@@ -104,6 +112,13 @@
 
 .register-link:hover {
     text-decoration: underline;
+}
+
+/* Checkbox group */
+
+.checkbox-label{
+    display: block;
+    padding: 2px;
 }
 
 /* Responsive tweaks */

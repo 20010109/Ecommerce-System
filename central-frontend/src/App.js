@@ -1,24 +1,27 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { ApolloProvider } from "@apollo/client";
-import { client as inventoryClient } from "./ApolloClient/ApolloClientInventory";
-import { client as orderClient } from "./ApolloClient/ApolloClientOrder";
+import inventoryClient from "./ApolloClient/ApolloClientInventory";
+import orderClient from "./ApolloClient/ApolloClientOrder";
+import userClient from './ApolloClient/ApolloClientUser';
 
 // Components
 import Header from "./components/Header";
 import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
 import AboutPage from "./components/About";
+import ProfilePage from "./components/ProfilePage";
 
-// Buyer Pages (REST-based)
+// Buyer Pages
 import BuyerProductCatalog from "./components/BuyerPages/BuyerProductCatalog";
-import BuyerProductDetails from "./components/BuyerPages/BuyerProductDetail";
+import BuyerProductDetails from "./components/BuyerPages/BuyerProductDetails";
 
-// Seller Pages (still Apollo-based)
+// Seller Pages
 import SellerInventory from "./components/SellerPages/SellerInventory";
 import SellerDashboard from "./components/SellerPages/SellerDashboard";
 import SellerOrdersPage from "./components/SellerPages/SellerOrdersPage";
 import SellerOrderDetail from "./components/SellerPages/SellerOrderDetail";
+import RegisterSeller from "./components/SellerPages/RegisterSeller";
 
 // Routes
 import PrivateRoute from "./routes/PrivateRoute";
@@ -34,7 +37,11 @@ function AppContent() {
   return (
     <>
       {/* Conditionally hide the Header */}
-      {!hideHeaderPaths.includes(location.pathname) && <Header />}
+      {!hideHeaderPaths.includes(location.pathname) && (
+        <ApolloProvider client={userClient}>
+          <Header />
+        </ApolloProvider>
+      )}
 
       <Routes>
         {/* Public routes */}
@@ -43,10 +50,18 @@ function AppContent() {
 
         {/* Seller-only routes */}
         <Route
+          path="/seller/register"
+          element={
+            <PrivateRoute>
+              <RegisterSeller />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/dashboard"
           element={
             <ApolloProvider client={inventoryClient}>
-              <RoleBasedRoute allowedRoles={['seller']}>
+              <RoleBasedRoute allowedRoles={["seller"]}>
                 <SellerDashboard />
               </RoleBasedRoute>
             </ApolloProvider>
@@ -56,7 +71,7 @@ function AppContent() {
           path="/inventory"
           element={
             <ApolloProvider client={inventoryClient}>
-              <RoleBasedRoute allowedRoles={['seller']}>
+              <RoleBasedRoute allowedRoles={["seller"]}>
                 <SellerInventory />
               </RoleBasedRoute>
             </ApolloProvider>
@@ -66,7 +81,7 @@ function AppContent() {
           path="/seller/orders"
           element={
             <ApolloProvider client={orderClient}>
-              <RoleBasedRoute allowedRoles={['seller']}>
+              <RoleBasedRoute allowedRoles={["seller"]}>
                 <SellerOrdersPage />
               </RoleBasedRoute>
             </ApolloProvider>
@@ -76,36 +91,40 @@ function AppContent() {
           path="/seller/orders/:orderId"
           element={
             <ApolloProvider client={orderClient}>
-              <RoleBasedRoute allowedRoles={['seller']}>
+              <RoleBasedRoute allowedRoles={["seller"]}>
                 <SellerOrderDetail />
               </RoleBasedRoute>
             </ApolloProvider>
           }
         />
-        {/* <Route
-          path="/seller/orders/:orderId"
-          element={
-            <RoleBasedRoute allowedRoles={['seller']}>
-              <SellerOrderDetail />
-            </RoleBasedRoute>
-          }
-        /> */}
 
-        {/* Buyer-only routes (REST-based) */}
+        {/* Buyer-only routes */}
         <Route
           path="/catalog"
           element={
-            <RoleBasedRoute allowedRoles={['buyer']}>
+            <ApolloProvider client={inventoryClient}>
               <BuyerProductCatalog />
-            </RoleBasedRoute>
+            </ApolloProvider>
           }
         />
         <Route
           path="/catalog/:id"
           element={
-            <RoleBasedRoute allowedRoles={['buyer']}>
+            <ApolloProvider client={inventoryClient}>
               <BuyerProductDetails />
-            </RoleBasedRoute>
+            </ApolloProvider>
+          }
+        />
+
+        {/* Profile Page wrapped with UserApolloClient */}
+        <Route
+          path="/profile"
+          element={
+            <ApolloProvider client={userClient}>
+              <PrivateRoute>
+                <ProfilePage />
+              </PrivateRoute>
+            </ApolloProvider>
           }
         />
 
@@ -128,9 +147,9 @@ function AppContent() {
 
 function App() {
   return (
-      <Router>
-        <AppContent />
-      </Router>
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
