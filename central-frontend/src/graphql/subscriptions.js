@@ -43,3 +43,16 @@ export const SUBSCRIBE_TO_NEW_VARIANTS = gql`
     }
   }
 `;
+
+// Subscription to listen for real-time order updates
+export const SUBSCRIBE_TO_ORDERS = gql`
+  subscription SubscribeToOrders {
+    orders(order_by: { created_at: desc }) {
+      id
+      buyer_name
+      status
+      total_amount
+      created_at
+    }
+  }
+`;

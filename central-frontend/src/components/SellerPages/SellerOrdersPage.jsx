@@ -1,12 +1,12 @@
 import React from "react";
-import { useQuery } from "@apollo/client";
-import { useNavigate } from "react-router-dom";
-import { GET_ORDERS } from "../../graphql/queries"; // Adjust path if needed
-import "./style/SellerOrdersPage.css"; // Create later for styling
+import { useSubscription } from "@apollo/client";
+import { SUBSCRIBE_TO_ORDERS } from "../../graphql/subscriptions";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+import "./style/SellerOrdersPage.css";
 
 const SellerOrdersPage = () => {
-  const { loading, error, data } = useQuery(GET_ORDERS);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Initialize navigate
+  const { data, loading, error } = useSubscription(SUBSCRIBE_TO_ORDERS);
 
   if (loading) return <p className="seller-orders-loading">Loading orders...</p>;
   if (error) return <p className="seller-orders-error">Error fetching orders: {error.message}</p>;
@@ -39,7 +39,7 @@ const SellerOrdersPage = () => {
                   <td>
                     <button
                       className="seller-orders-view-button"
-                      onClick={() => navigate(`/seller/orders/${order.id}`)}
+                      onClick={() => navigate(`/seller/orders/${order.id}`)} // Use navigate here
                     >
                       VIEW
                     </button>
