@@ -145,7 +145,6 @@ export default function Header() {
 
           {userRole === 'seller' && (
             <>
-              <Link to="/catalog">Catalog</Link>
               <Link to="/inventory">Inventory</Link>
               <Link to="/seller/orders">Orders</Link>
             </>

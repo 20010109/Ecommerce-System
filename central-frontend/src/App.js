@@ -103,7 +103,9 @@ function AppContent() {
           path="/catalog"
           element={
             <ApolloProvider client={inventoryClient}>
+              <RoleBasedRoute allowedRoles={["buyer"]}>
               <BuyerProductCatalog />
+              </RoleBasedRoute>
             </ApolloProvider>
           }
         />
