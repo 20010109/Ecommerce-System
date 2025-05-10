@@ -6,11 +6,12 @@ import orderClient from "./ApolloClient/ApolloClientOrder";
 import userClient from './ApolloClient/ApolloClientUser';
 
 // Components
-import Header from "./components/Header";
+import Header from "./components/Header/Header";
 import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
 import AboutPage from "./components/About";
 import ProfilePage from "./components/ProfilePage";
+import CartPage from './components/CartPage/CartPage';
 
 // Buyer Pages
 import BuyerProductCatalog from "./components/BuyerPages/BuyerProductCatalog";
@@ -140,6 +141,15 @@ function AppContent() {
                 <BuyerOrderDetails />
               </RoleBasedRoute>
             </ApolloProvider>
+          }
+        />
+
+        <Route
+          path="/cart"
+          element={
+            <RoleBasedRoute allowedRoles={["buyer"]}>
+              <CartPage  />
+            </RoleBasedRoute>
           }
         />
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../../api/authService"; // Backend API call
+import { login } from "../../context/authService"; // Backend API call
 import domalogo from "../images/domalogo.png";
 import './style/Login.css';
 import { jwtDecode } from "jwt-decode";  // ✅ Import jwtDecode

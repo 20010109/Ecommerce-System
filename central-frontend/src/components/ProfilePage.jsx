@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getProfile, updateProfile } from '../api/authService';
+import { getProfile, updateProfile } from '../context/authService';
 import './common/ProfilePage.css';
 import { useNavigate } from 'react-router-dom';
 

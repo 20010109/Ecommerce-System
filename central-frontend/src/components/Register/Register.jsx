@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { register } from "../../api/authService";
+import { register } from "../../context/authService";
 import "./style/Register.css";
 import domalogo from "../images/domalogo.png";
 

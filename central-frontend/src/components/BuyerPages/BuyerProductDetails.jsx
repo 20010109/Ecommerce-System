@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./style/BuyerProductDetails.css";
+import { useCart } from "../../context/CartContext";
+import { jwtDecode } from "jwt-decode";
+
 
 export default function BuyerProductDetails() {
   const { id } = useParams();
@@ -10,6 +13,7 @@ export default function BuyerProductDetails() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const navigate = useNavigate(); 
+  const { setCartCount } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -47,17 +51,92 @@ export default function BuyerProductDetails() {
     }
   };
 
-  const handleAddToCart = () => {
-    if (!selectedVariant) return;
-    console.log("Adding to cart:", selectedVariant);
-    // Add your CartService logic here
+  const handleAddToCart = async () => {
+    if (!selectedVariant || !product) return;
+  
+    const token = localStorage.getItem('token');
+    if (!token) return alert("You must be logged in to add to cart.");
+  
+    const decoded = jwtDecode(token);
+    const userId = decoded["https://hasura.io/jwt/claims"]?.["x-hasura-user-id"];
+  
+    const payload = {
+      user_id: parseInt(userId),
+      product_id: product.id,
+      variant_id: selectedVariant.id,
+      product_name: product.name,
+      variant_name: selectedVariant.variant_name,
+      size: selectedVariant.size,
+      color: selectedVariant.color,
+      price: product.base_price,
+      quantity: 1,
+      image_url: selectedVariant.image,
+    };
+  
+    try {
+      const res = await fetch("http://localhost:8006/cart/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!res.ok) throw new Error("Failed to add to cart");
+  
+      // fetch updated cart for this user
+      const cartRes = await fetch(`http://localhost:8006/cart/${userId}`);
+      const cartItems = await cartRes.json();
+      setCartCount(cartItems.length);
+      alert("Item added to cart!");
+    } catch (err) {
+      console.error("Add to cart failed:", err);
+      alert("There was a problem adding to cart.");
+    }
   };
 
-  const handleOrderNow = () => {
-    if (!selectedVariant) return;
-    console.log("Ordering now:", selectedVariant);
-    // Add your OrderService logic here
+  const handleOrderNow = async () => {
+    if (!selectedVariant || !product) return;
+  
+    const token = localStorage.getItem('token');
+    if (!token) return alert("You must be logged in.");
+  
+    const decoded = jwtDecode(token);
+    const userId = decoded["https://hasura.io/jwt/claims"]?.["x-hasura-user-id"];
+  
+    const item = {
+      user_id: parseInt(userId),
+      product_id: product.id,
+      variant_id: selectedVariant.id,
+      product_name: product.name,
+      variant_name: selectedVariant.variant_name,
+      size: selectedVariant.size,
+      color: selectedVariant.color,
+      price: product.base_price,
+      quantity: 1,
+      subtotal: product.base_price * 1,
+      image_url: selectedVariant.image,
+    };
+  
+    const payload = {
+      user_id: parseInt(userId),
+      items: [item],
+    };
+  
+    try {
+      const res = await fetch("http://localhost:8003/api/rest/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!res.ok) throw new Error("Order failed");
+  
+      alert("Order placed successfully!");
+    } catch (err) {
+      console.error("Order error:", err);
+      alert("There was a problem placing your order.");
+    }
   };
+  
 
   if (loading) return <p className="loading-message">Loading...</p>;
   if (error) return <p className="error-message">{error}</p>;

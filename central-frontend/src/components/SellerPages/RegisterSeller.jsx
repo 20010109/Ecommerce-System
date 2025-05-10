@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { applySeller } from "../../api/authService";
+import { applySeller } from "../../context/authService";
 import "./style/RegisterSeller.css";  // Optional for styling
 
 function RegisterSeller() {

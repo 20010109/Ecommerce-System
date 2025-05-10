@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './common/Header.css';
+import './style/Header.css';
 import { jwtDecode } from 'jwt-decode';
 import { FaShoppingCart } from 'react-icons/fa';
+import { useCart } from '../../context/CartContext';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -13,28 +14,39 @@ export default function Header() {
     username: '',
     profileImageUrl: ''
   });
+  const { cartCount, setCartCount } = useCart();
 
   const token = localStorage.getItem('token');
   let userRole = null;
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        if (!token) return;
-        const res = await fetch('http://localhost:8000/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.ok) {
+      const fetchProfile = async () => {
+        try {
+          if (!token) return;
+      
+          const res = await fetch('http://localhost:8000/me', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+      
+          if (!res.ok) throw new Error("Failed to fetch profile");
+      
           const data = await res.json();
           setProfile({
             username: data.username,
             profileImageUrl: data.profile_image_url
           });
+      
+          // Decode token to get userId
+          const decoded = jwtDecode(token);
+          const userId = decoded["https://hasura.io/jwt/claims"]?.["x-hasura-user-id"];
+      
+          const cartRes = await fetch(`http://localhost:8006/cart/${userId}`);
+          const cartData = await cartRes.json();
+          setCartCount(cartData.length);
+        } catch (err) {
+          console.error('Failed to fetch profile/cart count:', err);
         }
-      } catch (err) {
-        console.error('Failed to fetch profile:', err);
-      }
-    };
+      };
     fetchProfile();
   }, [token]);
 
@@ -157,6 +169,16 @@ export default function Header() {
               My Shop
             </button>
           )}
+
+          {userRole === 'buyer' && (
+            <>
+              <Link to="/cart" className="cart-icon">
+                🛒
+                {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+              </Link>
+            </>
+          )}
+
 
           <div
             className="profile-area"
