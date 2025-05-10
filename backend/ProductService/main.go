@@ -25,6 +25,7 @@ func main() {
 
     r.Get("/products", handlers.GetProducts)
 	r.Get("/categories", handlers.GetCategories)
+    r.Get("/products/{id}", handlers.GetProductByID)
 
 
     go redis.SubscribeToInventoryEvents()

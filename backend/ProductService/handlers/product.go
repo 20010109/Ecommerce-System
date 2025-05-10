@@ -2,27 +2,49 @@ package handlers
 
 import (
 	"encoding/json"
+	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
 )
 
 type Product struct {
-	ID             int     `json:"id"`
-	Name           string  `json:"name"`
-	Description    string  `json:"description"`
-	BasePrice      float64 `json:"base_price"`
-	Image          string  `json:"image"`
-	Category       string  `json:"category"`
-	SKU            string  `json:"sku"`
-	Listed         bool    `json:"listed"`
-	SellerID       int     `json:"seller_id"`
-	SellerUsername string  `json:"seller_username"`
+	ID             int              `json:"id"`
+	Name           string           `json:"name"`
+	Description    string           `json:"description"`
+	BasePrice      float64          `json:"base_price"`
+	Image          string           `json:"image"`
+	Category       string           `json:"category"`
+	SKU            string           `json:"sku"`
+	Listed         bool             `json:"listed"`
+	SellerID       int              `json:"seller_id"`
+	SellerUsername string           `json:"seller_username"`
+	CreatedAt      string           `json:"created_at"`
+	UpdatedAt      string           `json:"updated_at"`
+	ProductVariants []ProductVariant `json:"product_variants,omitempty"` // Only used for Product Details
+}
+
+type ProductVariant struct {
+	ID            int     `json:"id"`
+	ProductID     int     `json:"product_id"`
+	VariantName   string  `json:"variant_name"`
+	Size          string  `json:"size"`
+	Color         string  `json:"color"`
+	SKU           string  `json:"sku"`
+	StockQuantity int     `json:"stock_quantity"`
+	Image         string  `json:"image"`
+	CreatedAt     string  `json:"created_at"`
+	UpdatedAt     string  `json:"updated_at"`
 }
 
 func GetProducts(w http.ResponseWriter, r *http.Request) {
+	log.Println("Incoming /products request with query params:", r.URL.RawQuery)
+
+	// ✅ Updated to fetch from the correct Hasura Inventory service (catalog: no variants)
 	req, err := http.NewRequest("GET", "http://hasura-inventory:8080/api/rest/products", nil)
 	if err != nil {
+		log.Println("Failed to create request:", err)
 		http.Error(w, "Failed to create request", http.StatusInternalServerError)
 		return
 	}
@@ -31,20 +53,25 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		log.Println("Failed to fetch from InventoryService:", err)
 		http.Error(w, "Failed to fetch from InventoryService", http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
 
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	log.Println("InventoryService (catalog) response body:", string(bodyBytes))
+
 	var result struct {
 		Products []Product `json:"products"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	if err := json.Unmarshal(bodyBytes, &result); err != nil {
+		log.Println("Failed to decode InventoryService response:", err)
 		http.Error(w, "Failed to decode InventoryService response", http.StatusInternalServerError)
 		return
 	}
 
-	// Filters from query params
+	// Apply query filters
 	queryName := strings.ToLower(r.URL.Query().Get("name"))
 	queryCategory := strings.ToLower(r.URL.Query().Get("category"))
 	queryListed := r.URL.Query().Get("listed")
@@ -93,50 +120,102 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(filtered)
 }
 
-func GetCategories(w http.ResponseWriter, r *http.Request) {
-    // Update the link to your Hasura REST API for categories
-    req, err := http.NewRequest("GET", "http://hasura-inventory:8080/api/rest/categories", nil)
-    if err != nil {
-        http.Error(w, "Failed to create request", http.StatusInternalServerError)
-        return
-    }
-    req.Header.Set("x-hasura-admin-secret", "password")
+func GetProductByID(w http.ResponseWriter, r *http.Request) {
+	idStr := strings.TrimPrefix(r.URL.Path, "/products/")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid product ID", http.StatusBadRequest)
+		return
+	}
 
-    client := &http.Client{}
-    resp, err := client.Do(req)
-    if err != nil {
-        http.Error(w, "Failed to fetch from InventoryService", http.StatusInternalServerError)
-        return
-    }
-    defer resp.Body.Close()
+	url := "http://hasura-inventory:8080/api/rest/products/" + strconv.Itoa(id) + "?id=" + strconv.Itoa(id)
+	log.Println("Fetching product details from:", url)
 
-    // This struct assumes Hasura returns:
-    // { "products": [ { "category": "Shoes" }, { "category": "Clothes" } ... ] }
-    var result struct {
-        Products []struct {
-            Category string `json:"category"`
-        } `json:"products"`
-    }
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Println("Failed to create request:", err)
+		http.Error(w, "Failed to create request", http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("x-hasura-admin-secret", "password")
 
-    if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-        http.Error(w, "Failed to decode InventoryService response", http.StatusInternalServerError)
-        return
-    }
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Failed to fetch from InventoryService:", err)
+		http.Error(w, "Failed to fetch from InventoryService", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
 
-    // Extract unique categories from the result
-    uniqueCategories := []string{}
-    seen := make(map[string]bool)
-    for _, item := range result.Products {
-        if item.Category != "" && !seen[item.Category] {
-            seen[item.Category] = true
-            uniqueCategories = append(uniqueCategories, item.Category)
-        }
-    }
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	log.Println("InventoryService (details) response body:", string(bodyBytes))
 
-    // Return as { "categories": [ ... ] }
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(map[string]interface{}{
-        "categories": uniqueCategories,
-    })
+	if resp.StatusCode == http.StatusNotFound {
+		http.Error(w, "Product not found", http.StatusNotFound)
+		return
+	}
+
+	// ✅ Decode full product details (includes product_variants)
+	var product struct {
+		Product Product `json:"products_by_pk"`
+	}
+	if err := json.Unmarshal(bodyBytes, &product); err != nil {
+		log.Println("Failed to decode InventoryService response:", err)
+		http.Error(w, "Failed to decode InventoryService response", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(product.Product)
 }
 
+func GetCategories(w http.ResponseWriter, r *http.Request) {
+	log.Println("Fetching categories...")
+
+	req, err := http.NewRequest("GET", "http://hasura-inventory:8080/api/rest/categories", nil)
+	if err != nil {
+		log.Println("Failed to create request:", err)
+		http.Error(w, "Failed to create request", http.StatusInternalServerError)
+		return
+	}
+	req.Header.Set("x-hasura-admin-secret", "password")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Failed to fetch from InventoryService:", err)
+		http.Error(w, "Failed to fetch from InventoryService", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	log.Println("Categories response body:", string(bodyBytes))
+
+	var result struct {
+		Products []struct {
+			Category string `json:"category"`
+		} `json:"products"`
+	}
+
+	if err := json.Unmarshal(bodyBytes, &result); err != nil {
+		log.Println("Failed to decode InventoryService response:", err)
+		http.Error(w, "Failed to decode InventoryService response", http.StatusInternalServerError)
+		return
+	}
+
+	uniqueCategories := []string{}
+	seen := make(map[string]bool)
+	for _, item := range result.Products {
+		if item.Category != "" && !seen[item.Category] {
+			seen[item.Category] = true
+			uniqueCategories = append(uniqueCategories, item.Category)
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"categories": uniqueCategories,
+	})
+}
