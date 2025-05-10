@@ -1,33 +1,63 @@
-.buyer-order-details-container {
-    padding: 2rem;
-  }
-  
-  .buyer-order-title {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-  }
-  
-  .order-info,
-  .recipient-info {
-    margin-bottom: 2rem;
-  }
-  
-  .order-items table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .order-items th,
-  .order-items td {
-    padding: 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .back-button {
-    background-color: #0071e3;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-  }
+.buyer-order-detail-container {
+  padding: 2rem;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+}
+
+.buyer-order-detail-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.buyer-order-info,
+.buyer-recipient-info {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  flex: 1;
+}
+
+.buyer-order-items {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.buyer-order-items table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.buyer-order-items th,
+.buyer-order-items td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.buyer-order-total {
+  text-align: right;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.buyer-order-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.buyer-order-back-button {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
