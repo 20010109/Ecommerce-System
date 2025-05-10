@@ -1,0 +1,68 @@
+.buyer-orders-container {
+    padding: 2rem;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+  }
+  
+  .buyer-orders-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+  
+  .buyer-orders-table-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .buyer-orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  
+  .buyer-orders-table thead {
+    background-color: #e0e0e0;
+  }
+  
+  .buyer-orders-table th,
+  .buyer-orders-table td {
+    text-align: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .buyer-orders-table th {
+    font-weight: 600;
+    color: #444;
+  }
+  
+  .buyer-orders-table tr:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .buyer-orders-view-button {
+    background-color: #0071e3;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .buyer-orders-view-button:hover {
+    background-color: #005bb5;
+  }
+  
+  .buyer-orders-loading,
+  .buyer-orders-error,
+  .buyer-orders-no-data {
+    text-align: center;
+    color: #666;
+    padding: 1rem;
+  }

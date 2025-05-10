@@ -36,12 +36,23 @@ type OrderItemInput struct {
 }
 
 func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("/create-order endpoint was hit!")
+    log.Println("/create-order endpoint was hit!")
+
+    // Extract user ID from the token
+    userID, err := extractUserIDFromToken(r.Header.Get("Authorization"))
+    if err != nil {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
     var req CreateOrderRequest
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
         http.Error(w, "invalid request", http.StatusBadRequest)
         return
     }
+
+    // Use the extracted user ID as the buyer_id
+    req.BuyerID = userID
 
     // Build GraphQL mutation
     mutation := `
@@ -55,8 +66,8 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
     orderData := map[string]interface{}{
         "buyer_id":         req.BuyerID,
         "buyer_name":       req.BuyerName,
-        "seller_id":        req.SellerID,                 // NEW
-        "seller_username":  req.SellerUsername,     // NEW
+        "seller_id":        req.SellerID,
+        "seller_username":  req.SellerUsername,
         "status":           "pending",
         "total_amount":     calculateTotal(req.OrderItems),
         "payment_method":   req.PaymentMethod,
@@ -72,7 +83,7 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
     // Create GraphQL request
     reqBody := gql.NewRequest(mutation)
     reqBody.Var("order", orderData)
-	reqBody.Header.Set("x-hasura-admin-secret", "password")
+    reqBody.Header.Set("x-hasura-admin-secret", "password")
 
     // Run the mutation
     if err := graphql.GetClient().Run(context.Background(), reqBody, nil); err != nil {
@@ -82,6 +93,39 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
 
     w.WriteHeader(http.StatusCreated)
     w.Write([]byte(`{"status":"order created"}`))
+}
+
+func extractUserIDFromToken(authHeader string) (int, error) {
+    if authHeader == "" {
+        return 0, errors.New("missing authorization header")
+    }
+
+    // Decode the token (use a library like jwt-go)
+    tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+    token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+        // Validate the signing method and return the secret key
+        if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+            return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+        }
+        return []byte("your-secret-key"), nil
+    })
+
+    if err != nil || !token.Valid {
+        return 0, errors.New("invalid token")
+    }
+
+    // Extract user ID from token claims
+    claims, ok := token.Claims.(jwt.MapClaims)
+    if !ok {
+        return 0, errors.New("invalid token claims")
+    }
+
+    userID, ok := claims["id"].(float64) // Assuming "id" is the key in the token
+    if !ok {
+        return 0, errors.New("user ID not found in token")
+    }
+
+    return int(userID), nil
 }
 
 // Helper function to calculate total
@@ -215,6 +259,43 @@ func GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(respData)
+}
+
+func GetOrdersByBuyerHandler(w http.ResponseWriter, r *http.Request) {
+    // Extract user ID from the token
+    userID, err := extractUserIDFromToken(r.Header.Get("Authorization"))
+    if err != nil {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    // GraphQL query to fetch orders by buyer_id
+    query := `
+    query GetOrdersByBuyer($buyer_id: Int!) {
+      orders(where: { buyer_id: { _eq: $buyer_id } }, order_by: { created_at: desc }) {
+        id
+        status
+        total_amount
+      }
+    }`
+
+    // Prepare GraphQL request
+    gqlReq := gql.NewRequest(query)
+    gqlReq.Var("buyer_id", userID)
+    gqlReq.Header.Set("x-hasura-admin-secret", "password")
+
+    // Prepare a variable to decode the GraphQL response
+    var respData map[string]interface{}
+
+    // Execute the GraphQL query
+    if err := graphql.GetClient().Run(context.Background(), gqlReq, &respData); err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    // Respond with the filtered orders
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(respData)
 }

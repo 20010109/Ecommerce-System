@@ -139,7 +139,7 @@ export default function Header() {
           {userRole === 'buyer' && (
             <>
               <Link to="/catalog">Catalog</Link>
-              <Link to="/order">Orders</Link>
+              <Link to="/orders">Orders</Link>
             </>
           )}
 

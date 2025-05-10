@@ -2,11 +2,11 @@ import React from "react";
 import { useQuery } from "@apollo/client";
 import { useParams } from "react-router-dom";
 import { GET_PRODUCT_BY_ID } from "../../graphql/buyerCatalogQueries"; // Import GraphQL query
-import './style/BuyerProductDetails.css';
+import "./style/BuyerProductDetails.css";
 
 export default function BuyerProductDetails() {
   const { id } = useParams();
-  
+
   // Fetch product details by ID using Apollo's useQuery hook
   const { loading, error, data } = useQuery(GET_PRODUCT_BY_ID, {
     variables: { id: parseInt(id) }, // Pass the product ID as a variable
@@ -19,35 +19,54 @@ export default function BuyerProductDetails() {
   const product = data.products_by_pk;
 
   return (
-    <div className="product-detail-container p-6">
-      <h1 className="product-title text-3xl font-bold mb-4">{product.name}</h1>
-
-      <div className="product-image-container mb-6">
-        <img 
-          src={product.image} 
-          alt={product.name} 
-          className="product-image w-full max-w-lg object-cover rounded-lg"
-        />
+    <div className="product-details-page">
+      {/* Left Section: Image Gallery */}
+      <div className="product-gallery">
+        <div className="gallery-thumbnails">
+          {product.product_variants?.map((variant, index) => (
+            <img
+              key={index}
+              src={variant.image}
+              alt={`Variant ${index + 1}`}
+              className="thumbnail"
+            />
+          ))}
+        </div>
+        <div className="main-image">
+          <img src={product.image} alt={product.name} />
+        </div>
       </div>
 
-      <p className="product-description text-lg text-gray-700 mb-4">{product.description}</p>
-      <p className="product-price text-blue-600 font-bold text-2xl my-2">${product.base_price}</p>
+      {/* Right Section: Product Details */}
+      <div className="product-info">
+        <h1 className="product-title">{product.name}</h1>
+        <p className="product-category">{product.category}</p>
+        <div className="product-pricing">
+          <span className="current-price">₱{product.base_price.toLocaleString()}</span>
+        </div>
+        <p className="product-description">{product.description}</p>
 
-      <div className="variants-section mt-6">
-        <h2 className="variants-title text-xl font-semibold">Available Variants</h2>
-        <ul className="variants-list list-disc ml-6 mt-3">
-          {/* Displaying variants */}
-          {product.product_variants_aggregate && product.product_variants_aggregate.aggregate.sum.stock_quantity > 0 ? (
-            <li>
-              {/* Example of displaying variant data */}
-              <span className="variant-name font-medium">Size: M</span> - 
-              <span className="variant-color">Color: Red</span> | 
-              <span className="variant-stock">Stock: {product.product_variants_aggregate.aggregate.sum.stock_quantity}</span>
-            </li>
-          ) : (
-            <p>No variants available.</p>
-          )}
-        </ul>
+        {/* Variants Section */}
+        <div className="variants-section">
+          <h2 className="variants-title">Available Variants</h2>
+          <div className="variants-list">
+            {product.product_variants?.map((variant) => (
+              <div key={variant.id} className="variant-card">
+                <img src={variant.image} alt={variant.variant_name} className="variant-image" />
+                <p className="variant-details">
+                  <strong>{variant.variant_name}</strong> - {variant.size} - {variant.color}
+                </p>
+                <p className="variant-stock">Stock: {variant.stock_quantity}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="action-buttons">
+          <button className="add-to-bag-button">Add to Bag</button>
+          <button className="favourite-button">Favourite</button>
+        </div>
       </div>
     </div>
   );

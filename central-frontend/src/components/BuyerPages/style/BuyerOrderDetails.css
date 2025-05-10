@@ -1,0 +1,33 @@
+.buyer-order-details-container {
+    padding: 2rem;
+  }
+  
+  .buyer-order-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .order-info,
+  .recipient-info {
+    margin-bottom: 2rem;
+  }
+  
+  .order-items table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .order-items th,
+  .order-items td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .back-button {
+    background-color: #0071e3;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+  }

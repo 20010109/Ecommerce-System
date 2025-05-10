@@ -15,6 +15,8 @@ import ProfilePage from "./components/ProfilePage";
 // Buyer Pages
 import BuyerProductCatalog from "./components/BuyerPages/BuyerProductCatalog";
 import BuyerProductDetails from "./components/BuyerPages/BuyerProductDetails";
+import BuyerOrdersList from "./components/BuyerPages/BuyerOrderList"; // ✅ Import BuyerOrdersList
+import BuyerOrderDetails from "./components/BuyerPages/BuyerOrderDetails"; // ✅ Import BuyerOrderDetails
 
 // Seller Pages
 import SellerInventory from "./components/SellerPages/SellerInventory";
@@ -109,6 +111,7 @@ function AppContent() {
             </ApolloProvider>
           }
         />
+
         <Route
           path="/catalog/:id"
           element={
@@ -118,6 +121,29 @@ function AppContent() {
           }
         />
 
+        <Route
+          path="/orders"
+          element={
+            <ApolloProvider client={orderClient}>
+              <RoleBasedRoute allowedRoles={["buyer"]}>
+                <BuyerOrdersList />
+              </RoleBasedRoute>
+            </ApolloProvider>
+          }
+        />
+
+        <Route
+          path="/orders/:id"
+          element={
+            <ApolloProvider client={orderClient}>
+              <RoleBasedRoute allowedRoles={["buyer"]}>
+                <BuyerOrderDetails />
+              </RoleBasedRoute>
+            </ApolloProvider>
+          }
+        />
+
+        
         {/* Profile Page wrapped with UserApolloClient */}
         <Route
           path="/profile"
@@ -139,6 +165,7 @@ function AppContent() {
             </PrivateRoute>
           }
         />
+        
 
         {/* Unauthorized fallback */}
         <Route path="/unauthorized" element={<UnauthorizedPage />} />

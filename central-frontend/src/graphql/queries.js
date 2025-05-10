@@ -60,3 +60,35 @@ export const GET_ORDER_DETAILS = gql`
   }
 `;
 
+export const GET_ORDERS_BY_BUYER = gql`
+  query GetOrdersByBuyer($buyerId: Int!) {
+    orders(where: { buyer_id: { _eq: $buyerId } }, order_by: { created_at: desc }) {
+      id
+      status
+      total_amount
+    }
+  }
+`;
+
+export const GET_ORDER_BY_ID = gql`
+  query GetOrderById($id: Int!) {
+    orders_by_pk(id: $id) {
+      id
+      buyer_name
+      order_date
+      status
+      payment_method
+      payment_status
+      shipping_method
+      shipping_address
+      contact_number
+      order_items {
+        id
+        product_name
+        variant_name
+        quantity
+        subtotal
+      }
+    }
+  }
+`;
