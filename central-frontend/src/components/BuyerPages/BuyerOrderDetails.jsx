@@ -65,7 +65,7 @@ const BuyerOrderDetails = () => {
         <p><strong>Shipping Method:</strong> {order.shipping_method}</p>
       </div>
 
-      <button className="back-button" onClick={() => navigate("/buyer/orders")}>
+      <button className="back-button" onClick={() => navigate("/orders")}>
         BACK
       </button>
     </div>

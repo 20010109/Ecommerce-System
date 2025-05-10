@@ -1,7 +1,5 @@
 import { gql } from '@apollo/client';
 
-
-
 export const GET_ORDERS = gql`
   query GetOrders {
   orders {
@@ -61,8 +59,8 @@ export const GET_ORDER_DETAILS = gql`
 `;
 
 export const GET_ORDERS_BY_BUYER = gql`
-  query GetOrdersByBuyer($buyerId: Int!) {
-    orders(where: { buyer_id: { _eq: $buyerId } }, order_by: { created_at: desc }) {
+  query GetOrdersByBuyer($id: Int!) {
+    orders(where: { buyer_id: { _eq: $id } }, order_by: { created_at: desc }) {
       id
       status
       total_amount

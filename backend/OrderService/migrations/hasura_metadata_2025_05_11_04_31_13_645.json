@@ -1,0 +1,346 @@
+{
+  "resource_version": 35,
+  "metadata": {
+    "version": 3,
+    "sources": [
+      {
+        "name": "default",
+        "kind": "postgres",
+        "tables": [],
+        "configuration": {
+          "connection_info": {
+            "database_url": {
+              "from_env": "HASURA_GRAPHQL_DATABASE_URL"
+            },
+            "isolation_level": "read-committed",
+            "pool_settings": {
+              "connection_lifetime": 600,
+              "idle_timeout": 180,
+              "max_connections": 50,
+              "retries": 1
+            },
+            "use_prepared_statements": true
+          }
+        }
+      },
+      {
+        "name": "orderdb",
+        "kind": "postgres",
+        "tables": [
+          {
+            "table": {
+              "name": "order_items",
+              "schema": "public"
+            },
+            "object_relationships": [
+              {
+                "name": "order",
+                "using": {
+                  "foreign_key_constraint_on": "order_id"
+                }
+              }
+            ],
+            "insert_permissions": [
+              {
+                "role": "seller",
+                "permission": {
+                  "check": {
+                    "order": {
+                      "seller_id": {
+                        "_eq": "X-Hasura-User-Id"
+                      }
+                    }
+                  },
+                  "columns": [
+                    "id",
+                    "order_id",
+                    "product_id",
+                    "quantity",
+                    "variant_id",
+                    "price",
+                    "subtotal",
+                    "color",
+                    "image_url",
+                    "product_name",
+                    "size",
+                    "variant_name"
+                  ]
+                },
+                "comment": ""
+              }
+            ],
+            "select_permissions": [
+              {
+                "role": "buyer",
+                "permission": {
+                  "columns": [
+                    "id",
+                    "order_id",
+                    "product_id",
+                    "quantity",
+                    "variant_id",
+                    "price",
+                    "subtotal",
+                    "color",
+                    "image_url",
+                    "product_name",
+                    "size",
+                    "variant_name"
+                  ],
+                  "filter": {}
+                },
+                "comment": ""
+              },
+              {
+                "role": "seller",
+                "permission": {
+                  "columns": [
+                    "id",
+                    "order_id",
+                    "product_id",
+                    "quantity",
+                    "variant_id",
+                    "price",
+                    "subtotal",
+                    "color",
+                    "image_url",
+                    "product_name",
+                    "size",
+                    "variant_name"
+                  ],
+                  "filter": {
+                    "order": {
+                      "seller_id": {
+                        "_eq": "X-Hasura-User-Id"
+                      }
+                    }
+                  }
+                },
+                "comment": ""
+              }
+            ],
+            "update_permissions": [
+              {
+                "role": "seller",
+                "permission": {
+                  "columns": [
+                    "quantity",
+                    "subtotal"
+                  ],
+                  "filter": {},
+                  "check": {
+                    "order": {
+                      "seller_id": {
+                        "_eq": "X-Hasura-User-Id"
+                      }
+                    }
+                  }
+                },
+                "comment": ""
+              }
+            ],
+            "delete_permissions": [
+              {
+                "role": "seller",
+                "permission": {
+                  "filter": {
+                    "order": {
+                      "seller_id": {
+                        "_eq": "X-Hasura-User-Id"
+                      }
+                    }
+                  }
+                },
+                "comment": ""
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "order_status_history",
+              "schema": "public"
+            },
+            "object_relationships": [
+              {
+                "name": "order",
+                "using": {
+                  "foreign_key_constraint_on": "order_id"
+                }
+              }
+            ]
+          },
+          {
+            "table": {
+              "name": "orders",
+              "schema": "public"
+            },
+            "array_relationships": [
+              {
+                "name": "order_items",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "order_id",
+                    "table": {
+                      "name": "order_items",
+                      "schema": "public"
+                    }
+                  }
+                }
+              },
+              {
+                "name": "order_status_histories",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "order_id",
+                    "table": {
+                      "name": "order_status_history",
+                      "schema": "public"
+                    }
+                  }
+                }
+              }
+            ],
+            "insert_permissions": [
+              {
+                "role": "buyer",
+                "permission": {
+                  "check": {
+                    "buyer_id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  },
+                  "columns": [
+                    "buyer_id",
+                    "created_at",
+                    "id",
+                    "seller_username",
+                    "status",
+                    "total_amount"
+                  ]
+                },
+                "comment": ""
+              },
+              {
+                "role": "seller",
+                "permission": {
+                  "check": {
+                    "seller_id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  },
+                  "set": {
+                    "seller_id": "x-hasura-"
+                  },
+                  "columns": [
+                    "buyer_id",
+                    "id",
+                    "seller_id",
+                    "total_amount",
+                    "buyer_name",
+                    "contact_number",
+                    "payment_method",
+                    "payment_status",
+                    "seller_username",
+                    "shipping_address",
+                    "shipping_method",
+                    "status",
+                    "created_at",
+                    "order_date",
+                    "payment_verified_at",
+                    "updated_at"
+                  ]
+                },
+                "comment": ""
+              }
+            ],
+            "select_permissions": [
+              {
+                "role": "buyer",
+                "permission": {
+                  "columns": [
+                    "buyer_id",
+                    "id",
+                    "seller_id",
+                    "total_amount",
+                    "buyer_name",
+                    "contact_number",
+                    "payment_method",
+                    "payment_status",
+                    "seller_username",
+                    "shipping_address",
+                    "shipping_method",
+                    "status",
+                    "created_at",
+                    "order_date",
+                    "payment_verified_at",
+                    "updated_at"
+                  ],
+                  "filter": {
+                    "buyer_id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  }
+                },
+                "comment": ""
+              },
+              {
+                "role": "seller",
+                "permission": {
+                  "columns": [
+                    "buyer_id",
+                    "id",
+                    "seller_id",
+                    "total_amount",
+                    "buyer_name",
+                    "contact_number",
+                    "payment_method",
+                    "payment_status",
+                    "seller_username",
+                    "shipping_address",
+                    "shipping_method",
+                    "status",
+                    "created_at",
+                    "order_date",
+                    "payment_verified_at",
+                    "updated_at"
+                  ],
+                  "filter": {
+                    "seller_id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  }
+                },
+                "comment": ""
+              }
+            ],
+            "update_permissions": [
+              {
+                "role": "seller",
+                "permission": {
+                  "columns": [
+                    "payment_status",
+                    "status"
+                  ],
+                  "filter": {
+                    "seller_id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  },
+                  "check": null
+                },
+                "comment": ""
+              }
+            ]
+          }
+        ],
+        "configuration": {
+          "connection_info": {
+            "database_url": "postgres://postgres:password@host.docker.internal:5432/orderdb",
+            "isolation_level": "read-committed",
+            "use_prepared_statements": false
+          }
+        }
+      }
+    ]
+  }
+}

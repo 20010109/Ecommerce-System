@@ -21,6 +21,6 @@ func main() {
     r.Delete("/delete-order", handlers.DeleteOrderHandler)
     r.Get("/orders", handlers.GetOrdersHandler)
 
-    log.Println("OrderService is running on :8082")
-    http.ListenAndServe(":8082", r)
+    log.Println("OrderService is running on :8100")
+    http.ListenAndServe(":8100", r)
 }

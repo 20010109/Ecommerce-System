@@ -1,19 +1,18 @@
 import React from "react";
 import { useQuery } from "@apollo/client";
-import { GET_ORDERS_BY_BUYER } from "../../graphql/queries"; // Import the query
+import { GET_ORDERS} from "../../graphql/queries";
 import { useNavigate } from "react-router-dom";
 import "./style/BuyerOrderList.css";
 
 const BuyerOrderList = () => {
   const navigate = useNavigate();
-  const { data, loading, error } = useQuery(GET_ORDERS_BY_BUYER, {
-    variables: { buyerId: parseInt(localStorage.getItem("userId"), 10) }, // Replace with actual buyer ID
-  });
+  const { data, loading, error } = useQuery(GET_ORDERS); // ❌ remove variable injection
 
   if (loading) return <p>Loading orders...</p>;
   if (error) return <p>Error fetching orders: {error.message}</p>;
+
+  const orders = data?.orders || []; // ✅ move this up
   if (orders.length === 0) return <p>No orders found.</p>;
-  const orders = data?.orders || [];
 
   return (
     <div className="buyer-orders-container">
@@ -36,7 +35,7 @@ const BuyerOrderList = () => {
               <td>
                 <button
                   className="view-order-button"
-                  onClick={() => navigate(`/buyer/orders/${order.id}`)}
+                  onClick={() => navigate(`/orders/${order.id}`)}
                 >
                   VIEW
                 </button>

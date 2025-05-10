@@ -3,11 +3,16 @@ package handlers
 import (
     "context"
     "encoding/json"
-	"log"
+    "errors"
+    "fmt"
+    "log"
     "net/http"
-    "orderservice/graphql"
+    "strings"
 
     gql "github.com/machinebox/graphql"
+    "github.com/golang-jwt/jwt"
+
+    "orderservice/graphql"
 )
 
 type CreateOrderRequest struct {
