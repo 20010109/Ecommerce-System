@@ -5,6 +5,8 @@ type CartItem struct {
     UserID       int     `json:"user_id"`
     ProductID    int     `json:"product_id"`
     VariantID    int     `json:"variant_id"`
+    SellerID       int    `json:"seller_id"`
+    SellerUsername string `json:"seller_username"`
     ProductName  string  `json:"product_name"`
     VariantName  string  `json:"variant_name"`
     Size         string  `json:"size"`

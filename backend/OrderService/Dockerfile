@@ -1,4 +1,4 @@
-# ---------- Stage 1: Build the AuthService ----------
+# ---------- Stage 1: Build the OrderService ----------
 FROM golang:1.24-alpine AS builder
 
 # Set working directory
@@ -16,23 +16,23 @@ RUN go mod download
 # Copy the rest of your code
 COPY . .
 
-# Build the AuthService binary
-RUN go build -o PaymentService .
+# Build the OrderService binary
+RUN go build -o OrderService .
 
-# ---------- Stage 2: Run the AuthService ----------
+# ---------- Stage 2: Run the OrderService ----------
 FROM alpine:latest
 
 # Set working directory
 WORKDIR /root/
 
 # Copy the binary from the builder stage
-COPY --from=builder /app/PaymentService .
+COPY --from=builder /app/OrderService .
 
 # Optionally copy .env if you want it baked in (usually better to use env vars)
- COPY .env .env
+# COPY .env .
 
-# Expose the port your AuthService listens on
-EXPOSE 8004
+# Expose the port your OrderService listens on
+EXPOSE 8100
 
-# Command to run the AuthService binary
-CMD ["./PaymentService"]
+# Command to run the OrderService binary
+CMD ["./OrderService"]

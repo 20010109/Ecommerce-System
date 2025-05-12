@@ -1,5 +1,5 @@
 {
-  "resource_version": 35,
+  "resource_version": 37,
   "metadata": {
     "version": 3,
     "sources": [
@@ -42,15 +42,9 @@
             ],
             "insert_permissions": [
               {
-                "role": "seller",
+                "role": "buyer",
                 "permission": {
-                  "check": {
-                    "order": {
-                      "seller_id": {
-                        "_eq": "X-Hasura-User-Id"
-                      }
-                    }
-                  },
+                  "check": {},
                   "columns": [
                     "id",
                     "order_id",
@@ -65,6 +59,14 @@
                     "size",
                     "variant_name"
                   ]
+                },
+                "comment": ""
+              },
+              {
+                "role": "seller",
+                "permission": {
+                  "check": {},
+                  "columns": []
                 },
                 "comment": ""
               }
@@ -157,20 +159,6 @@
           },
           {
             "table": {
-              "name": "order_status_history",
-              "schema": "public"
-            },
-            "object_relationships": [
-              {
-                "name": "order",
-                "using": {
-                  "foreign_key_constraint_on": "order_id"
-                }
-              }
-            ]
-          },
-          {
-            "table": {
               "name": "orders",
               "schema": "public"
             },
@@ -178,22 +166,13 @@
               {
                 "name": "order_items",
                 "using": {
-                  "foreign_key_constraint_on": {
-                    "column": "order_id",
-                    "table": {
+                  "manual_configuration": {
+                    "column_mapping": {
+                      "id": "order_id"
+                    },
+                    "insertion_order": null,
+                    "remote_table": {
                       "name": "order_items",
-                      "schema": "public"
-                    }
-                  }
-                }
-              },
-              {
-                "name": "order_status_histories",
-                "using": {
-                  "foreign_key_constraint_on": {
-                    "column": "order_id",
-                    "table": {
-                      "name": "order_status_history",
                       "schema": "public"
                     }
                   }
@@ -206,14 +185,23 @@
                 "permission": {
                   "check": {
                     "buyer_id": {
-                      "_eq": "X-Hasura-User-Id"
+                      "_eq": "x-hasura-user-id"
                     }
                   },
                   "columns": [
                     "buyer_id",
+                    "buyer_name",
+                    "contact_number",
                     "created_at",
                     "id",
+                    "order_date",
+                    "payment_method",
+                    "payment_status",
+                    "payment_verified_at",
+                    "seller_id",
                     "seller_username",
+                    "shipping_address",
+                    "shipping_method",
                     "status",
                     "total_amount"
                   ]
@@ -329,6 +317,46 @@
                   "check": null
                 },
                 "comment": ""
+              }
+            ],
+            "event_triggers": [
+              {
+                "name": "on_order_created",
+                "definition": {
+                  "enable_manual": false,
+                  "insert": {
+                    "columns": "*"
+                  }
+                },
+                "retry_conf": {
+                  "interval_sec": 10,
+                  "num_retries": 0,
+                  "timeout_sec": 60
+                },
+                "webhook": "http://payment-service:8004/publish-order-created"
+              },
+              {
+                "name": "on_order_created_inventory",
+                "definition": {
+                  "enable_manual": false,
+                  "insert": {
+                    "columns": "*"
+                  }
+                },
+                "retry_conf": {
+                  "interval_sec": 10,
+                  "num_retries": 0,
+                  "timeout_sec": 60
+                },
+                "webhook": "http://order-service:8100/publish-order-stock",
+                "request_transform": {
+                  "body": {
+                    "action": "transform",
+                    "template": "{\r\n  \"table\": {\r\n    \"name\": {{$body.table.name}},\r\n    \"schema\": {{$body.table.schema}}\r\n  }\r\n}"
+                  },
+                  "template_engine": "Kriti",
+                  "version": 2
+                }
               }
             ]
           }

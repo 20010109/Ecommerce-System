@@ -1,307 +1,184 @@
 package handlers
 
 import (
-    "context"
-    "encoding/json"
-    "errors"
-    "fmt"
-    "log"
-    "net/http"
-    "strings"
+	"context"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"strconv"
+	"strings"
 
-    gql "github.com/machinebox/graphql"
-    "github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt"
+	gql "github.com/machinebox/graphql"
 
-    "orderservice/graphql"
+	"orderservice/graphql"
+	"orderservice/rabbitmq"
 )
 
+// Request payload for creating an order
 type CreateOrderRequest struct {
-    BuyerID         int               `json:"buyer_id"`
-    BuyerName       string            `json:"buyer_name"`
-    SellerID         int              `json:"seller_id"`
-    SellerUsername   string           `json:"seller_username"`
-    ShippingMethod  string            `json:"shipping_method"`
-    ShippingAddress string            `json:"shipping_address"`
-    ContactNumber   string            `json:"contact_number"`
-    PaymentMethod   string            `json:"payment_method"`
-    OrderItems      []OrderItemInput  `json:"order_items"`
+	BuyerID         int              `json:"buyer_id"`
+	BuyerName       string           `json:"buyer_name"`
+	SellerID        int              `json:"seller_id"`
+	SellerUsername  string           `json:"seller_username"`
+	ShippingMethod  string           `json:"shipping_method"`
+	ShippingAddress string           `json:"shipping_address"`
+	ContactNumber   string           `json:"contact_number"`
+	PaymentMethod   string           `json:"payment_method"`
+	OrderItems      []OrderItemInput `json:"order_items"`
 }
 
 type OrderItemInput struct {
-    ProductID    int     `json:"product_id"`
-    VariantID    int     `json:"variant_id"`
-    ProductName  string  `json:"product_name"`
-    VariantName  string  `json:"variant_name"`
-    Size         string  `json:"size"`
-    Color        string  `json:"color"`
-    Price        float64 `json:"price"`
-    Quantity     int     `json:"quantity"`
-    Subtotal     float64 `json:"subtotal"`
-    ImageURL     string  `json:"image_url"`
+	ProductID   int     `json:"product_id"`
+	VariantID   int     `json:"variant_id"`
+	ProductName string  `json:"product_name"`
+	VariantName string  `json:"variant_name"`
+	Size        string  `json:"size"`
+	Color       string  `json:"color"`
+	Price       float64 `json:"price"`
+	Quantity    int     `json:"quantity"`
+	Subtotal    float64 `json:"subtotal"`
+	ImageURL    string  `json:"image_url"`
 }
 
+// Handles order creation and RabbitMQ stock message publishing
 func CreateOrderHandler(w http.ResponseWriter, r *http.Request) {
-    log.Println("/create-order endpoint was hit!")
+	log.Println("📨 /create-order endpoint hit")
 
-    // Extract user ID from the token
-    userID, err := extractUserIDFromToken(r.Header.Get("Authorization"))
-    if err != nil {
-        http.Error(w, "Unauthorized", http.StatusUnauthorized)
-        return
-    }
+	userID, err := extractUserIDFromToken(r.Header.Get("Authorization"))
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
-    var req CreateOrderRequest
-    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-        http.Error(w, "invalid request", http.StatusBadRequest)
-        return
-    }
+	var req CreateOrderRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
 
-    // Use the extracted user ID as the buyer_id
-    req.BuyerID = userID
+	if len(req.OrderItems) == 0 {
+		http.Error(w, "Order must contain at least one item", http.StatusBadRequest)
+		return
+	}
 
-    // Build GraphQL mutation
-    mutation := `
-    mutation CreateOrder($order: orders_insert_input!) {
-      insert_orders_one(object: $order) {
-        id
-      }
-    }`
+	req.BuyerID = userID
 
-    // Prepare order data
-    orderData := map[string]interface{}{
-        "buyer_id":         req.BuyerID,
-        "buyer_name":       req.BuyerName,
-        "seller_id":        req.SellerID,
-        "seller_username":  req.SellerUsername,
-        "status":           "pending",
-        "total_amount":     calculateTotal(req.OrderItems),
-        "payment_method":   req.PaymentMethod,
-        "payment_status":   "pending",
-        "shipping_method":  req.ShippingMethod,
-        "shipping_address": req.ShippingAddress,
-        "contact_number":   req.ContactNumber,
-        "order_items": map[string]interface{}{
-            "data": req.OrderItems,
-        },
-    }
+	// GraphQL mutation to insert the order via Hasura
+	mutation := `
+	mutation CreateOrder($order: orders_insert_input!) {
+		insert_orders_one(object: $order) {
+			id
+		}
+	}`
 
-    // Create GraphQL request
-    reqBody := gql.NewRequest(mutation)
-    reqBody.Var("order", orderData)
-    reqBody.Header.Set("x-hasura-admin-secret", "password")
+	orderData := map[string]interface{}{
+		"buyer_id":         req.BuyerID,
+		"buyer_name":       req.BuyerName,
+		"seller_id":        req.SellerID,
+		"seller_username":  req.SellerUsername,
+		"status":           "pending",
+		"total_amount":     calculateTotal(req.OrderItems),
+		"payment_method":   req.PaymentMethod,
+		"payment_status":   "pending",
+		"shipping_method":  req.ShippingMethod,
+		"shipping_address": req.ShippingAddress,
+		"contact_number":   req.ContactNumber,
+		"order_items": map[string]interface{}{
+			"data": req.OrderItems,
+		},
+	}
 
-    // Run the mutation
-    if err := graphql.GetClient().Run(context.Background(), reqBody, nil); err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
+	reqBody := gql.NewRequest(mutation)
+	reqBody.Var("order", orderData)
+	reqBody.Header.Set("x-hasura-admin-secret", "password")
 
-    w.WriteHeader(http.StatusCreated)
-    w.Write([]byte(`{"status":"order created"}`))
+	var resp struct {
+		InsertOrdersOne struct {
+			ID int `json:"id"`
+		} `json:"insert_orders_one"`
+	}
+
+	if err := graphql.GetClient().Run(context.Background(), reqBody, &resp); err != nil {
+		log.Printf("❌ Failed to insert order: %v", err)
+		http.Error(w, "Order creation failed", http.StatusInternalServerError)
+		return
+	}
+
+	// Publish to RabbitMQ for inventory stock update
+	var items []rabbitmq.Item
+	for _, i := range req.OrderItems {
+		items = append(items, rabbitmq.Item{
+			VariantID: i.VariantID,
+			Quantity:  i.Quantity,
+		})
+	}
+
+	message := rabbitmq.OrderStockMessage{
+		OrderID: resp.InsertOrdersOne.ID,
+		Items:   items,
+	}
+
+	if err := rabbitmq.PublishOrderToInventoryQueue(message); err != nil {
+		log.Printf("❌ Failed to publish to inventory queue: %v", err)
+	} else {
+		log.Printf("✅ Order %d with %d items published to inventory queue", message.OrderID, len(items))
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status": "order created",
+		"id":     resp.InsertOrdersOne.ID,
+	})
 }
 
+// Extracts user ID from a Hasura JWT token
 func extractUserIDFromToken(authHeader string) (int, error) {
-    if authHeader == "" {
-        return 0, errors.New("missing authorization header")
-    }
+	if authHeader == "" {
+		return 0, fmt.Errorf("missing token")
+	}
 
-    // Decode the token (use a library like jwt-go)
-    tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-    token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-        // Validate the signing method and return the secret key
-        if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-            return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-        }
-        return []byte("your-secret-key"), nil
-    })
+	tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method")
+		}
+		return []byte("doma-ecommerce-system-jwt-secret-key"), nil
+	})
 
-    if err != nil || !token.Valid {
-        return 0, errors.New("invalid token")
-    }
+	if err != nil || !token.Valid {
+		return 0, fmt.Errorf("invalid token")
+	}
 
-    // Extract user ID from token claims
-    claims, ok := token.Claims.(jwt.MapClaims)
-    if !ok {
-        return 0, errors.New("invalid token claims")
-    }
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return 0, fmt.Errorf("invalid claims")
+	}
 
-    userID, ok := claims["id"].(float64) // Assuming "id" is the key in the token
-    if !ok {
-        return 0, errors.New("user ID not found in token")
-    }
+	hasuraClaims, ok := claims["https://hasura.io/jwt/claims"].(map[string]interface{})
+	if !ok {
+		return 0, fmt.Errorf("missing hasura claims")
+	}
 
-    return int(userID), nil
+	userIDStr, ok := hasuraClaims["x-hasura-user-id"].(string)
+	if !ok {
+		return 0, fmt.Errorf("missing user ID")
+	}
+
+	id, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		return 0, fmt.Errorf("invalid user ID format")
+	}
+
+	return id, nil
 }
 
-// Helper function to calculate total
+// Calculates the total order amount
 func calculateTotal(items []OrderItemInput) float64 {
-    total := 0.0
-    for _, item := range items {
-        total += item.Subtotal
-    }
-    return total
+	total := 0.0
+	for _, item := range items {
+		total += item.Subtotal
+	}
+	return total
 }
-
-// UpdateOrderStatusRequest represents the expected JSON payload
-type UpdateOrderStatusRequest struct {
-    OrderID   int    `json:"order_id"`
-    NewStatus string `json:"new_status"`
-}
-
-func UpdateOrderStatusHandler(w http.ResponseWriter, r *http.Request) {
-    var req UpdateOrderStatusRequest
-    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-        http.Error(w, "invalid request", http.StatusBadRequest)
-        return
-    }
-
-    // Build GraphQL mutation
-    mutation := `
-    mutation UpdateOrderStatus($order_id: Int!, $new_status: String!) {
-      update_orders_by_pk(pk_columns: {id: $order_id}, _set: {status: $new_status}) {
-        id
-        status
-      }
-    }`
-
-    // Prepare GraphQL request
-    gqlReq := gql.NewRequest(mutation)
-    gqlReq.Var("order_id", req.OrderID)
-    gqlReq.Var("new_status", req.NewStatus)
-	gqlReq.Header.Set("x-hasura-admin-secret", "password")
-
-    // Run the mutation
-    var respData map[string]interface{}
-    if err := graphql.GetClient().Run(context.Background(), gqlReq, &respData); err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-
-    // Respond success
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte(`{"status":"order updated successfully"}`))
-}
-
-// DeleteOrderRequest represents the expected JSON payload
-type DeleteOrderRequest struct {
-    OrderID int `json:"order_id"`
-}
-
-func DeleteOrderHandler(w http.ResponseWriter, r *http.Request) {
-    var req DeleteOrderRequest
-    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-        http.Error(w, "invalid request", http.StatusBadRequest)
-        return
-    }
-
-    // Build GraphQL mutation
-    mutation := `
-    mutation DeleteOrder($order_id: Int!) {
-      delete_orders_by_pk(id: $order_id) {
-        id
-      }
-    }`
-
-    // Prepare GraphQL request
-    gqlReq := gql.NewRequest(mutation)
-    gqlReq.Var("order_id", req.OrderID)
-    gqlReq.Header.Set("x-hasura-admin-secret", "password")
-
-    // Run the mutation
-    var respData map[string]interface{}
-    if err := graphql.GetClient().Run(context.Background(), gqlReq, &respData); err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-
-    // Respond success
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte(`{"status":"order deleted successfully"}`))
-}
-
-func GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
-    // GraphQL query
-    query := `
-    query GetOrders {
-      orders {
-        id
-        buyer_id
-        buyer_name
-        seller_id
-        seller_username
-        status
-        total_amount
-        payment_method
-        payment_status
-        shipping_method
-        shipping_address
-        contact_number
-        created_at
-        order_items {
-          id
-          product_id
-          variant_id
-          product_name
-          variant_name
-          size
-          color
-          price
-          quantity
-          subtotal
-          image_url
-        }
-      }
-    }`
-
-    gqlReq := gql.NewRequest(query)
-    gqlReq.Header.Set("x-hasura-admin-secret", "password")
-
-    // Prepare a variable to decode GraphQL response
-    var respData map[string]interface{}
-
-    if err := graphql.GetClient().Run(context.Background(), gqlReq, &respData); err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(respData)
-}
-
-func GetOrdersByBuyerHandler(w http.ResponseWriter, r *http.Request) {
-    // Extract user ID from the token
-    userID, err := extractUserIDFromToken(r.Header.Get("Authorization"))
-    if err != nil {
-        http.Error(w, "Unauthorized", http.StatusUnauthorized)
-        return
-    }
-
-    // GraphQL query to fetch orders by buyer_id
-    query := `
-    query GetOrdersByBuyer($buyer_id: Int!) {
-      orders(where: { buyer_id: { _eq: $buyer_id } }, order_by: { created_at: desc }) {
-        id
-        status
-        total_amount
-      }
-    }`
-
-    // Prepare GraphQL request
-    gqlReq := gql.NewRequest(query)
-    gqlReq.Var("buyer_id", userID)
-    gqlReq.Header.Set("x-hasura-admin-secret", "password")
-
-    // Prepare a variable to decode the GraphQL response
-    var respData map[string]interface{}
-
-    // Execute the GraphQL query
-    if err := graphql.GetClient().Run(context.Background(), gqlReq, &respData); err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-
-    // Respond with the filtered orders
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(respData)
-}
-

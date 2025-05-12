@@ -1,35 +1,45 @@
 scalar Time
 
 type Payment {
-    id: ID!
-    orderId: Int!
-    userId: Int!
-    amount: Float!
-    currency: String!
-    paymentMethod: String!
-    paymentStatus: String!
-    transactionReference: String
-    paymentProvider: String
-    paidAt: Time
-    createdAt: Time
-    updatedAt: Time
+  id: Int!
+  orderId: Int!
+  userId: Int!
+  amount: Float!
+  currency: String!
+  paymentMethod: String!
+  paymentStatus: String!
+  paymentProvider: String
+  paidAt: Time
+  createdAt: Time
+  updatedAt: Time
+  transactionReference: String!
 }
 
+
 input NewPayment {
-    orderId: Int!
-    userId: Int!
-    amount: Float!
-    currency: String!
-    paymentMethod: String!
-    paymentProvider: String
+  orderId: Int!
+  userId: Int!
+  amount: Float!
+  currency: String!
+  paymentMethod: String!
+  paymentProvider: String
+}
+
+input VerifyPaymentInput {
+  paymentId: Int!
+  paymentProvider: String!
+  credentials: String!
 }
 
 type Query {
-    payments: [Payment!]!
+  payments: [Payment!]!
+  getPaymentByOrderID(orderId: Int!): Payment
 }
 
 type Mutation {
-    createPayment(input: NewPayment!): Payment!
-    verifyPayment(paymentId: ID!): Payment
-    refundPayment(paymentId: ID!): Payment  
+  createPayment(input: NewPayment!): Payment!
+  verifyPayment(paymentId: ID!): Payment
+  refundPayment(paymentId: ID!): Payment
+  verifyOnlinePayment(input: VerifyPaymentInput!): Payment
 }
+

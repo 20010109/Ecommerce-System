@@ -1,13 +1,12 @@
 package graph
 
-// This file will not be regenerated automatically.
-//
-// It serves as dependency injection for your app, add any dependencies you require here.
 import (
-    "database/sql"
+	"database/sql"
 )
 
-type Resolver struct{
-    DB *sql.DB
+// Resolver serves as dependency injection container.
+type Resolver struct {
+	DB *sql.DB
 }
+
 

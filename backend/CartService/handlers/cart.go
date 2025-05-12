@@ -21,8 +21,12 @@ func AddToCart(w http.ResponseWriter, r *http.Request) {
     item.Subtotal = float64(item.Quantity) * item.Price
 
     query := `
-        INSERT INTO cart_items (user_id, product_id, variant_id, product_name, variant_name, size, color, price, quantity, subtotal, image_url)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        INSERT INTO cart_items (
+            user_id, product_id, variant_id, product_name, variant_name, 
+            size, color, price, quantity, subtotal, image_url,
+            seller_id, seller_username
+        ) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
         RETURNING id;
     `
 
@@ -30,6 +34,7 @@ func AddToCart(w http.ResponseWriter, r *http.Request) {
         item.UserID, item.ProductID, item.VariantID, item.ProductName,
         item.VariantName, item.Size, item.Color, item.Price,
         item.Quantity, item.Subtotal, item.ImageURL,
+        item.SellerID, item.SellerUsername,
     ).Scan(&item.ID)
 
     if err != nil {
@@ -49,7 +54,14 @@ func GetCart(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    query := `SELECT id, user_id, product_id, variant_id, product_name, variant_name, size, color, price, quantity, subtotal, image_url FROM cart_items WHERE user_id = $1`
+    query := `
+        SELECT 
+            id, user_id, product_id, variant_id, product_name, variant_name,
+            size, color, price, quantity, subtotal, image_url,
+            seller_id, seller_username
+        FROM cart_items
+        WHERE user_id = $1;
+    `
 
     rows, err := db.Pool.Query(context.Background(), query, userId)
     if err != nil {
@@ -65,6 +77,7 @@ func GetCart(w http.ResponseWriter, r *http.Request) {
             &item.ID, &item.UserID, &item.ProductID, &item.VariantID,
             &item.ProductName, &item.VariantName, &item.Size, &item.Color,
             &item.Price, &item.Quantity, &item.Subtotal, &item.ImageURL,
+            &item.SellerID, &item.SellerUsername,
         )
         if err != nil {
             http.Error(w, "Failed to parse cart item", http.StatusInternalServerError)

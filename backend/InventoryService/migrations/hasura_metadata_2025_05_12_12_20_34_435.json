@@ -1,5 +1,5 @@
 {
-  "resource_version": 93,
+  "resource_version": 100,
   "metadata": {
     "version": 3,
     "sources": [
@@ -269,10 +269,6 @@
         "definition": {
           "queries": [
             {
-              "name": "GetProducts",
-              "query": "query GetProducts {\r\n    products {\r\n      id\r\n      name\r\n      description\r\n      base_price\r\n      image\r\n      category\r\n      seller_username  \r\n      seller_id         \r\n      sku\r\n      product_variants_aggregate {\r\n        aggregate {\r\n          sum {\r\n            stock_quantity\r\n          }\r\n        }\r\n      }\r\n    }\r\n  }"
-            },
-            {
               "name": "CreateProduct",
               "query": "mutation CreateProduct(\r\n    $name: String!\r\n    $description: String\r\n    $basePrice: numeric!\r\n    $image: String\r\n    $category: String!\r\n    $listed: Boolean!\r\n  ) {\r\n    insert_products(\r\n      objects: {\r\n        name: $name\r\n        description: $description\r\n        base_price: $basePrice\r\n        image: $image\r\n        category: $category\r\n        listed: $listed\r\n      }\r\n    ) {\r\n      returning {\r\n        id\r\n        name\r\n        description\r\n        base_price\r\n        image\r\n        category\r\n        listed     \r\n      }\r\n    }\r\n  }"
             },
@@ -299,6 +295,18 @@
             {
               "name": "DeleteVariant",
               "query": "mutation DeleteVariant($id: Int!) {\r\n    delete_product_variants(where: { id: { _eq: $id } }) {\r\n      affected_rows\r\n    }\r\n  }"
+            },
+            {
+              "name": "getCategories",
+              "query": "query getCategories {\r\n  products(distinct_on: category, order_by: { category: asc }) {\r\n    category\r\n  }\r\n}"
+            },
+            {
+              "name": "GetProductDetails",
+              "query": "query GetProductDetails($id: Int!) {\r\n  products_by_pk(id: $id) {\r\n    base_price\r\n    category\r\n    created_at\r\n    description\r\n    id\r\n    image\r\n    listed\r\n    name\r\n    seller_username\r\n    seller_id\r\n    sku\r\n    updated_at\r\n    product_variants {\r\n      color\r\n      created_at\r\n      id\r\n      image\r\n      product_id\r\n      size\r\n      sku\r\n      stock_quantity\r\n      updated_at\r\n      variant_name\r\n    }\r\n  }\r\n}"
+            },
+            {
+              "name": "GetProducts",
+              "query": "query GetProducts {\r\n  products {\r\n    id\r\n    name\r\n    description\r\n    base_price\r\n    image\r\n    category\r\n    sku\r\n    listed\r\n    seller_id\r\n    seller_username\r\n    created_at\r\n    updated_at\r\n  }\r\n}"
             }
           ]
         }
@@ -313,6 +321,20 @@
       }
     ],
     "rest_endpoints": [
+      {
+        "comment": "",
+        "definition": {
+          "query": {
+            "collection_name": "allowed-queries",
+            "query_name": "getCategories"
+          }
+        },
+        "methods": [
+          "GET"
+        ],
+        "name": "getCategories",
+        "url": "categories"
+      },
       {
         "comment": "",
         "definition": {
@@ -382,6 +404,20 @@
         ],
         "name": "GetProducts",
         "url": "products"
+      },
+      {
+        "comment": "",
+        "definition": {
+          "query": {
+            "collection_name": "allowed-queries",
+            "query_name": "GetProductDetails"
+          }
+        },
+        "methods": [
+          "GET"
+        ],
+        "name": "GetProductDetails",
+        "url": "products/:id"
       },
       {
         "comment": "",

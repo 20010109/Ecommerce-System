@@ -35,6 +35,24 @@ services:
     ports:
       - "8001:8001"
 
+  order-service:
+    build: ./OrderService
+    ports:
+      - "8100:8100"
+    depends_on:
+      - rabbitmq
+
+  inventory-service:
+    build: ./InventoryService
+    ports:
+      - "8101:8101"
+    depends_on:
+      - rabbitmq
+    environment:
+      HASURA_ENDPOINT: http://hasura-inventory:8080/v1/graphql
+      HASURA_SECRET: password
+
+
   hasura-inventory:
     image: hasura/graphql-engine:latest
     ports:
@@ -45,7 +63,7 @@ services:
       HASURA_GRAPHQL_ADMIN_SECRET: password
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
 
-  hasura-orderservice:
+  hasura-order:
     image: hasura/graphql-engine:latest
     ports:
       - "8003:8080"

@@ -13,8 +13,8 @@ code {
 }
 :root {
   --color-bg: #F8EDED;       /* Pale pink background */
-  --color-accent: #B43F3F;   /* Orange accent */
-  --color-primary: #FF8225;  /* Red accent */
+  --color-accent: #FF8225;   /* Orange accent */
+  --color-primary: #B43F3F;  /* Red accent */ 
   --color-secondary: #173B45;/* Dark teal text */
 }
 

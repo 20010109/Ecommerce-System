@@ -2,40 +2,15 @@ schema:
   - graph/schema.graphqls
 
 exec:
-  package: graph
   filename: graph/generated.go
+  package: graph
 
 model:
   filename: graph/model/models_gen.go
   package: model
 
 resolver:
-  package: graph
   layout: follow-schema
   dir: graph
+  package: graph
   filename_template: "{name}.resolvers.go"
-
-autobind:
-  - "paymentservice/graph/model"
-
-models:
-  ID:
-    model:
-      - github.com/99designs/gqlgen/graphql.ID
-  UUID:
-    model:
-      - github.com/99designs/gqlgen/graphql.UUID
-  Int:
-    model:
-      - github.com/99designs/gqlgen/graphql.Int32
-  Int64:
-    model:
-      - github.com/99designs/gqlgen/graphql.Int
-      - github.com/99designs/gqlgen/graphql.Int64
-  Time:
-    model:
-      - paymentservice/graph/model.Time
-
-    
-      
-

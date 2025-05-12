@@ -42,7 +42,12 @@ export default function Header() {
       
           const cartRes = await fetch(`http://localhost:8006/cart/${userId}`);
           const cartData = await cartRes.json();
-          setCartCount(cartData.length);
+          if (Array.isArray(cartData)) {
+            setCartCount(cartData.length);
+          } else {
+            console.warn("Cart response is not an array:", cartData);
+            setCartCount(0); // fallback if cartData is invalid
+          }
         } catch (err) {
           console.error('Failed to fetch profile/cart count:', err);
         }

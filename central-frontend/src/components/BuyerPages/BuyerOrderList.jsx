@@ -1,6 +1,6 @@
 import React from "react";
 import { useQuery } from "@apollo/client";
-import { GET_ORDERS } from "../../graphql/queries";
+import { GET_ORDERS } from "../../graphql/OrderQueries";
 import { useNavigate } from "react-router-dom";
 import "./style/BuyerOrderList.css";
 

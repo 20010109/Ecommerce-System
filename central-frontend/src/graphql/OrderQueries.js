@@ -44,6 +44,7 @@ export const GET_ORDER_DETAILS = gql`
       shipping_method
       payment_method
       payment_status
+      payment_verified_at
       status
       total_amount
       created_at

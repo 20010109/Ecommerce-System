@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@apollo/client";
-import { GET_ORDER_DETAILS } from "../../graphql/queries";
+import { GET_ORDER_DETAILS } from "../../graphql/OrderQueries";
 import { UPDATE_ORDER_STATUS } from "../../graphql/mutations";
 import "./style/SellerOrderDetail.css";
 

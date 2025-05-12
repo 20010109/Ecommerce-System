@@ -1,0 +1,147 @@
+{
+  "resource_version": 11,
+  "metadata": {
+    "version": 3,
+    "sources": [
+      {
+        "name": "default",
+        "kind": "postgres",
+        "tables": [],
+        "configuration": {
+          "connection_info": {
+            "database_url": {
+              "from_env": "HASURA_GRAPHQL_DATABASE_URL"
+            },
+            "isolation_level": "read-committed",
+            "pool_settings": {
+              "connection_lifetime": 600,
+              "idle_timeout": 180,
+              "max_connections": 50,
+              "retries": 1
+            },
+            "use_prepared_statements": true
+          }
+        }
+      },
+      {
+        "name": "authdb",
+        "kind": "postgres",
+        "tables": [
+          {
+            "table": {
+              "name": "schema_migrations",
+              "schema": "public"
+            }
+          },
+          {
+            "table": {
+              "name": "users",
+              "schema": "public"
+            },
+            "select_permissions": [
+              {
+                "role": "buyer",
+                "permission": {
+                  "columns": [
+                    "address",
+                    "created_at",
+                    "email",
+                    "first_name",
+                    "id",
+                    "last_name",
+                    "phone_number",
+                    "profile_image_url",
+                    "status",
+                    "updated_at",
+                    "username"
+                  ],
+                  "filter": {
+                    "id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  }
+                },
+                "comment": ""
+              },
+              {
+                "role": "seller",
+                "permission": {
+                  "columns": [
+                    "address",
+                    "created_at",
+                    "email",
+                    "first_name",
+                    "id",
+                    "last_name",
+                    "phone_number",
+                    "profile_image_url",
+                    "shop_name",
+                    "status",
+                    "updated_at",
+                    "username"
+                  ],
+                  "filter": {
+                    "id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  }
+                },
+                "comment": ""
+              }
+            ],
+            "update_permissions": [
+              {
+                "role": "buyer",
+                "permission": {
+                  "columns": [
+                    "address",
+                    "first_name",
+                    "last_name",
+                    "metadata",
+                    "phone_number",
+                    "profile_image_url"
+                  ],
+                  "filter": {
+                    "id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  },
+                  "check": null
+                },
+                "comment": ""
+              },
+              {
+                "role": "seller",
+                "permission": {
+                  "columns": [
+                    "address",
+                    "first_name",
+                    "last_name",
+                    "metadata",
+                    "phone_number",
+                    "profile_image_url",
+                    "shop_name"
+                  ],
+                  "filter": {
+                    "id": {
+                      "_eq": "X-Hasura-User-Id"
+                    }
+                  },
+                  "check": null
+                },
+                "comment": ""
+              }
+            ]
+          }
+        ],
+        "configuration": {
+          "connection_info": {
+            "database_url": "postgres://postgres:password@host.docker.internal:5432/authdb",
+            "isolation_level": "read-committed",
+            "use_prepared_statements": false
+          }
+        }
+      }
+    ]
+  }
+}

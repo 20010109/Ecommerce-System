@@ -3,6 +3,8 @@ CREATE TABLE IF NOT EXISTS cart_items (
     user_id INT NOT NULL,
     product_id INT NOT NULL,
     variant_id INT NOT NULL,
+    seller_id INT,
+    seller_username TEXT;
     product_name TEXT NOT NULL,
     variant_name TEXT,
     size TEXT,

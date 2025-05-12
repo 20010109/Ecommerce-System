@@ -2,12 +2,16 @@
 
 package model
 
+import (
+	"time"
+)
+
 type Mutation struct {
 }
 
 type NewPayment struct {
-	OrderID         int32   `json:"orderId"`
-	UserID          int32   `json:"userId"`
+	OrderID         int     `json:"orderId"`
+	UserID          int     `json:"userId"`
 	Amount          float64 `json:"amount"`
 	Currency        string  `json:"currency"`
 	PaymentMethod   string  `json:"paymentMethod"`
@@ -15,19 +19,25 @@ type NewPayment struct {
 }
 
 type Payment struct {
-	ID                   string  `json:"id"`
-	OrderID              int32   `json:"orderId"`
-	UserID               int32   `json:"userId"`
-	Amount               float64 `json:"amount"`
-	Currency             string  `json:"currency"`
-	PaymentMethod        string  `json:"paymentMethod"`
-	PaymentStatus        string  `json:"paymentStatus"`
-	TransactionReference *string `json:"transactionReference,omitempty"`
-	PaymentProvider      *string `json:"paymentProvider,omitempty"`
-	PaidAt               *Time   `json:"paidAt,omitempty"`
-	CreatedAt            *Time   `json:"createdAt,omitempty"`
-	UpdatedAt            *Time   `json:"updatedAt,omitempty"`
+	ID                   int        `json:"id"`
+	OrderID              int        `json:"orderId"`
+	UserID               int        `json:"userId"`
+	Amount               float64    `json:"amount"`
+	Currency             string     `json:"currency"`
+	PaymentMethod        string     `json:"paymentMethod"`
+	PaymentStatus        string     `json:"paymentStatus"`
+	PaymentProvider      *string    `json:"paymentProvider,omitempty"`
+	PaidAt               *time.Time `json:"paidAt,omitempty"`
+	CreatedAt            *time.Time `json:"createdAt,omitempty"`
+	UpdatedAt            *time.Time `json:"updatedAt,omitempty"`
+	TransactionReference string     `json:"transactionReference"`
 }
 
 type Query struct {
+}
+
+type VerifyPaymentInput struct {
+	PaymentID       int    `json:"paymentId"`
+	PaymentProvider string `json:"paymentProvider"`
+	Credentials     string `json:"credentials"`
 }

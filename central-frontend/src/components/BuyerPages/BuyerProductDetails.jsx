@@ -3,6 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import "./style/BuyerProductDetails.css";
 import { useCart } from "../../context/CartContext";
 import { jwtDecode } from "jwt-decode";
+import { useMutation } from "@apollo/client";
+import { CREATE_ORDER } from "../../graphql/OrderMutation";
+
 
 
 export default function BuyerProductDetails() {
@@ -14,6 +17,7 @@ export default function BuyerProductDetails() {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const navigate = useNavigate(); 
   const { setCartCount } = useCart();
+
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -64,6 +68,8 @@ export default function BuyerProductDetails() {
       user_id: parseInt(userId),
       product_id: product.id,
       variant_id: selectedVariant.id,
+      seller_id: product.seller_id,
+      seller_username: product.seller_username,
       product_name: product.name,
       variant_name: selectedVariant.variant_name,
       size: selectedVariant.size,
@@ -93,49 +99,31 @@ export default function BuyerProductDetails() {
     }
   };
 
-  const handleOrderNow = async () => {
+  const [createOrder] = useMutation(CREATE_ORDER);
+
+  const handleOrderNow = () => {
     if (!selectedVariant || !product) return;
-  
-    const token = localStorage.getItem('token');
-    if (!token) return alert("You must be logged in.");
-  
-    const decoded = jwtDecode(token);
-    const userId = decoded["https://hasura.io/jwt/claims"]?.["x-hasura-user-id"];
-  
-    const item = {
-      user_id: parseInt(userId),
-      product_id: product.id,
-      variant_id: selectedVariant.id,
-      product_name: product.name,
-      variant_name: selectedVariant.variant_name,
-      size: selectedVariant.size,
-      color: selectedVariant.color,
-      price: product.base_price,
-      quantity: 1,
-      subtotal: product.base_price * 1,
-      image_url: selectedVariant.image,
-    };
-  
-    const payload = {
-      user_id: parseInt(userId),
-      items: [item],
-    };
-  
-    try {
-      const res = await fetch("http://localhost:8003/api/rest/create-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-  
-      if (!res.ok) throw new Error("Order failed");
-  
-      alert("Order placed successfully!");
-    } catch (err) {
-      console.error("Order error:", err);
-      alert("There was a problem placing your order.");
-    }
+    navigate("/place-order", {
+      state: {
+        cartItems: [
+          {
+            product_id: product.id,
+            variant_id: selectedVariant.id,
+            product_name: product.name,
+            variant_name: selectedVariant.variant_name,
+            size: selectedVariant.size,
+            color: selectedVariant.color,
+            price: selectedVariant.price || product.base_price,
+            quantity: 1,
+            image_url: selectedVariant.image,
+          },
+        ],
+        sellerId: product.seller_id,
+        sellerUsername: product.seller_username,
+      },
+    });    
   };
+  
   
 
   if (loading) return <p className="loading-message">Loading...</p>;

@@ -1,26 +1,34 @@
 package main
 
 import (
-    "log"
-    "net/http"
+	"log"
+	"net/http"
 
-    "github.com/go-chi/chi/v5"
-    "orderservice/graphql"
-    "orderservice/handlers"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
+
+	"orderservice/graphql"
+	"orderservice/handlers"
 )
 
 func main() {
-    // Initialize the GraphQL client (adjust port if needed)
-    graphql.InitClient("http://localhost:8003/v1/graphql") 
+	// Initialize GraphQL client for Hasura
+	graphql.InitClient("http://hasura-order:8080/v1/graphql")
 
-    r := chi.NewRouter()
+	r := chi.NewRouter()
 
-    // Register routes
-    r.Post("/create-order", handlers.CreateOrderHandler)
-    r.Patch("/update-order-status", handlers.UpdateOrderStatusHandler)
-    r.Delete("/delete-order", handlers.DeleteOrderHandler)
-    r.Get("/orders", handlers.GetOrdersHandler)
+	// Enable CORS for frontend
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
 
-    log.Println("OrderService is running on :8100")
-    http.ListenAndServe(":8100", r)
+	// POST /create-order endpoint
+	r.Post("/create-order", handlers.CreateOrderHandler)
+
+	log.Println("✅ OrderService is running on port :8100")
+	log.Fatal(http.ListenAndServe(":8100", r))
 }

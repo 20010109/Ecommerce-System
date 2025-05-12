@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import './style/CartPage.css';
 import { useCart } from '../../context/CartContext';
+import { useNavigate } from "react-router-dom";
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [total, setTotal] = useState(0);
   const { setCartCount } = useCart();
   const [selectedItems, setSelectedItems] = useState([]);
-
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -20,9 +21,8 @@ export default function CartPage() {
 
       const res = await fetch(`http://localhost:8006/cart/${userId}`);
       const data = await res.json();
-      setCartItems(data);
-      setCartCount(data.length);
-      setTotal(data.reduce((sum, item) => sum + item.subtotal, 0));
+      setCartItems(Array.isArray(data) ? data : []);
+      setCartCount(Array.isArray(data) ? data.length : 0);
     };
 
     fetchCart();
@@ -30,24 +30,18 @@ export default function CartPage() {
 
   const handleRemove = async (itemId) => {
     await fetch(`http://localhost:8006/cart/remove/${itemId}`, { method: 'DELETE' });
-  
-    // Remove from cartItems
     const updatedCart = cartItems.filter((item) => item.id !== itemId);
     setCartItems(updatedCart);
-  
-    // Also update selectedItems to remove deleted item
-    const updatedSelection = selectedItems.filter((item) => item.id !== itemId);
-    setSelectedItems(updatedSelection);
-  
+    setSelectedItems(selectedItems.filter((item) => item.id !== itemId));
     setCartCount((prev) => prev - 1);
   };
 
   const handleCheckboxChange = (item) => {
-    if (selectedItems.some((i) => i.id === item.id)) {
-      setSelectedItems(selectedItems.filter((i) => i.id !== item.id));
-    } else {
-      setSelectedItems([...selectedItems, item]);
-    }
+    setSelectedItems((prev) =>
+      prev.some((i) => i.id === item.id)
+        ? prev.filter((i) => i.id !== item.id)
+        : [...prev, item]
+    );
   };
 
   useEffect(() => {
@@ -55,45 +49,34 @@ export default function CartPage() {
     setTotal(sum);
   }, [selectedItems]);
 
-  const handleCheckout = async () => {
-    if (selectedItems.length === 0) return alert("Select items to order.");
-  
-    const token = localStorage.getItem('token');
-    if (!token) return;
-  
-    const decoded = jwtDecode(token);
-    const userId = decoded["https://hasura.io/jwt/claims"]?.["x-hasura-user-id"];
-  
-    const payload = {
-      user_id: parseInt(userId),
-      items: selectedItems
-    };
-  
-    try {
-      const res = await fetch("http://localhost:8003/api/rest/create-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+  const handleCheckout = () => {
+    if (selectedItems.length === 0) {
+      alert("Select items to order.");
+      return;
+    }
+
+    const groupedBySeller = selectedItems.reduce((acc, item) => {
+      if (!acc[item.seller_id]) acc[item.seller_id] = [];
+      acc[item.seller_id].push(item);
+      return acc;
+    }, {});
+
+    // For now, only support 1 seller at a time
+    for (const sellerId in groupedBySeller) {
+      navigate("/place-order", {
+        state: {
+          cartItems: groupedBySeller[sellerId],
+          sellerId: sellerId,
+          sellerUsername: groupedBySeller[sellerId][0]?.seller_username || "Seller",
+        },
       });
-  
-      if (!res.ok) throw new Error("Order failed");
-  
-      alert("Order placed successfully!");
-      setSelectedItems([]);
-      setCartItems(cartItems.filter(ci => !selectedItems.some(si => si.id === ci.id)));
-    } catch (err) {
-      console.error("Checkout error:", err);
-      alert("There was a problem placing your order.");
+      break;
     }
   };
-  
-  
-  
 
   return (
     <div className="cart-page">
       <h1>Your Cart</h1>
-
       {cartItems.length === 0 ? (
         <p className="empty-message">Your cart is empty 🛒</p>
       ) : (
@@ -102,10 +85,10 @@ export default function CartPage() {
             {cartItems.map((item) => (
               <div key={item.id} className="cart-item">
                 <input
-                    type="checkbox"
-                    checked={selectedItems.some((i) => i.id === item.id)}
-                    onChange={() => handleCheckboxChange(item)}
-                    />
+                  type="checkbox"
+                  checked={selectedItems.some((i) => i.id === item.id)}
+                  onChange={() => handleCheckboxChange(item)}
+                />
                 <img src={item.image_url} alt={item.product_name} className="cart-item-image" />
                 <div className="cart-item-details">
                   <h2>{item.product_name}</h2>
@@ -123,7 +106,7 @@ export default function CartPage() {
           <div className="cart-summary">
             <h2>Total: ₱{total.toFixed(2)}</h2>
             <button className="checkout-button" onClick={handleCheckout}>
-                Checkout Selected ({selectedItems.length})
+              Proceed to Checkout ({selectedItems.length})
             </button>
           </div>
         </>
