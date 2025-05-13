@@ -57,7 +57,7 @@ const ProfilePage = () => {
             setMessage(res.message);
             setIsEditing(false);
             fetchProfile();
-            window.location.reload(); // ✅ Force refresh Header + everything
+            window.location.reload(); // Force refresh Header + everything
         })
       .catch((err) => {
         console.error(err);
@@ -118,7 +118,7 @@ const ProfilePage = () => {
             <h4>Basic Information</h4>
             <p><strong>First Name:</strong> {profile.first_name}</p>
             <p><strong>Last Name:</strong> {profile.last_name}</p>
-            <p><strong>Updated At:</strong> {new Date(profile.updated_at).toLocaleString()}</p>
+            <p><strong>Updated At:</strong> {Date(profile.updated_at).toLocaleString()}</p>
           </div>
 
           <div className="button-row">

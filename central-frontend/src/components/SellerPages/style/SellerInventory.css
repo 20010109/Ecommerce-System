@@ -1,6 +1,7 @@
+/* ---------- Layout ---------- */
 .sellerinv-inventory-container {
   padding: 2rem;
-  background-color: #f9ebeb; /* soft pinkish background */
+  background-color: #f9ebeb;
   min-height: 100vh;
 }
 
@@ -17,22 +18,63 @@
   color: #333;
 }
 
+/* ---------- Buttons ---------- */
+.sellerinv-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.sellerinv-btn-primary {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+.sellerinv-btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.sellerinv-btn-secondary {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.sellerinv-btn-secondary:hover {
+  background-color: #d1d5db;
+}
+
+.sellerinv-btn-danger {
+  background-color: #ef4444;
+  color: #fff;
+}
+
+.sellerinv-btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.sellerinv-btn-warning {
+  background-color: #fbbf24;
+  color: #374151;
+}
+
+.sellerinv-btn-warning:hover {
+  background-color: #f59e0b;
+}
+
 .sellerinv-btn-add-product {
   background-color: #333;
   color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  font-size: 0.95rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
 .sellerinv-btn-add-product:hover {
   background-color: #555;
 }
 
-/* Table Styling */
+/* ---------- Table ---------- */
 .sellerinv-table-container {
   overflow-x: auto;
   background: white;
@@ -66,23 +108,21 @@
   background-color: #f5f5f5;
 }
 
-/* View button */
 .sellerinv-view-button {
   background-color: #333;
   color: white;
-  border: none;
   padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  font-size: 0.85rem;
 }
 
 .sellerinv-view-button:hover {
   background-color: #555;
 }
 
-/* Pagination */
+/* ---------- Pagination ---------- */
 .sellerinv-pagination {
   display: flex;
   justify-content: center;
@@ -109,17 +149,84 @@
   background-color: #999;
 }
 
-/* Loading & Error States */
-.sellerinv-table-container p {
-  text-align: center;
+/* ---------- Modals ---------- */
+.sellerinv-modal-content {
+  background-color: #fff;
   padding: 2rem;
-  color: #666;
+  max-width: 500px;
+  width: 90%;
+  margin: 5vh auto;
+  border-radius: 10px;
+  position: relative;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  font-family: 'Segoe UI', sans-serif;
+  resize: both;
+  overflow: auto;
 }
 
-/* Product Details */
+.sellerinv-modal-content h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.sellerinv-modal-content form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.sellerinv-modal-content input[type="text"],
+.sellerinv-modal-content input[type="number"],
+.sellerinv-modal-content textarea {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  width: 90%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+.sellerinv-modal-content textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.sellerinv-modal-content label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  font-size: 0.95rem;
+}
+
+.sellerinv-close-button {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+/* Modal action buttons */
+.sellerinv-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+/* ---------- Product Details ---------- */
 .sellerinv-product-info {
   display: grid;
   grid-template-columns: 300px auto;
+  gap: 1.5rem;
 }
 
 .sellerinv-product-image {
@@ -130,32 +237,25 @@
   background: #f3f4f6;
 }
 
-
-.sellerinv-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.sellerinv-close-button {
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
 .sellerinv-modal-content p {
   margin: 5px 0;
   font-size: 0.95rem;
 }
 
-.sellerinv-modal-actions {
-  display: flex;
-  gap: 10px;
-  margin: 15px 0;
+/* ---------- Image Preview ---------- */
+.sellerinv-image-preview {
+  margin-top: 0.5rem;
+  text-align: center;
 }
 
+.sellerinv-image-preview img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* ---------- Variant Cards ---------- */
 .sellerinv-variant-list {
   margin-top: 15px;
 }
@@ -166,15 +266,10 @@
   border-radius: 6px;
   padding: 10px;
   margin: 8px 0;
-  grid-template-columns: auto auto auto;
-}
-
-.sellerinv-variant-imagediv {
-  grid-column: 1;
-}
-
-.sellerinv-variant-detailsdiv {
-  grid-column: 2;
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  align-items: center;
+  gap: 10px;
 }
 
 .sellerinv-variant-image {
@@ -185,7 +280,7 @@
   background: #f3f4f6;
 }
 
-.sellerinv-variant-card p {
+.sellerinv-variant-detailsdiv p {
   margin: 3px 0;
   font-size: 0.9rem;
 }
@@ -193,18 +288,11 @@
 .sellerinv-variant-actions {
   display: flex;
   gap: 8px;
-  margin-top: 10px;
-  grid-column: 3;
 }
 
-
-/* Add Variant Modal */
-.sellerinv-add-variant-modal-content {
-  display: grid;
-  grid-template-columns: auto auto;
-  grid-gap: 10px;
-  margin: 5px 0;
-  font-size: 0.95rem;
+/* ---------- Add Variant Modal ---------- */
+.sellerinv-add-variant-modal-maindiv {
+  padding: 2rem;
 }
 
 .sellerinv-add-variant-modal-header {
@@ -214,67 +302,118 @@
   margin-bottom: 10px;
 }
 
+.sellerinv-add-variant-modal-content {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-gap: 20px;
+  font-size: 0.95rem;
+}
+
 .sellerinv-add-variant-modal-left-side {
-  border: black 2px solid;
+  border: 2px solid black;
   background-color: #f9fafb;
   height: 300px;
   width: 300px;
-  margin: 0 auto;
-  margin-top: 10px;
-  grid-column: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.sellerinv-add-variant-modal-right-side {
-  grid-column: 2;
+.sellerinv-add-variant-modal-left-side img {
+  max-width: 100%;
+  max-height: 100%;
 }
 
-.sellerinv-image-preview {
-  /* If you had styles before for image-preview, move here */
-}
-
-/* Buttons */
-.sellerinv-btn {
-  padding: 8px 12px;
-  border: none;
+.sellerinv-add-variant-modal-right-side input {
+  width: 100%;
+  padding: 0.6rem;
+  margin: 5px 0;
   border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+}
+
+
+
+
+/* PRODUCT DETAILS MODAL (separate from form modals) */
+.sellerinv-product-modal {
+  background-color: #fff;
+  padding: 2rem;
+  max-width: 800px;
+  width: 95%;
+  margin: 5vh auto;
+  border-radius: 10px;
+  position: relative;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  font-family: 'Segoe UI', sans-serif;
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+.sellerinv-product-modal h2 {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.sellerinv-product-modal h3 {
+  margin-top: 2rem;
+  font-size: 1.2rem;
   font-weight: 600;
+}
+
+.sellerinv-product-modal .sellerinv-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.sellerinv-product-modal .sellerinv-close-button {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
   cursor: pointer;
-  transition: background 0.2s ease;
 }
 
-.sellerinv-btn-primary {
-  background-color: #3b82f6;
-  color: #fff;
+/* Variant card spacing */
+.sellerinv-product-modal .sellerinv-variant-list {
+  margin-top: 1rem;
 }
 
-.sellerinv-btn-primary:hover {
-  background-color: #2563eb;
+/* Product info layout */
+.sellerinv-product-info {
+  display: grid;
+  grid-template-columns: 300px auto;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
-.sellerinv-btn-danger {
-  background-color: #ef4444;
-  color: #fff;
+.sellerinv-product-info-leftdiv {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.sellerinv-btn-danger:hover {
-  background-color: #dc2626;
+.sellerinv-product-image {
+  width: 250px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #f3f4f6;
 }
 
-.sellerinv-btn-secondary {
-  background-color: #e5e7eb;
-  color: #374151;
+/* Right content in product details */
+.sellerinv-product-info-rightdiv p {
+  margin: 6px 0;
+  font-size: 0.95rem;
 }
 
-.sellerinv-btn-secondary:hover {
-  background-color: #d1d5db;
-}
-
-/* (NEW) Warning button used in JSX */
-.sellerinv-btn-warning {
-  background-color: #fbbf24;
-  color: #374151;
-}
-
-.sellerinv-btn-warning:hover {
-  background-color: #f59e0b;
+.sellerinv-product-modal .sellerinv-modal-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }

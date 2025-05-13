@@ -24,6 +24,8 @@ const Inventory = () => {
   const [productDetailsModalOpen, setProductDetailsModalOpen] = useState(false);
   const [variantModalOpen, setVariantModalOpen] = useState(false);
   const [variantEditModalOpen, setVariantEditModalOpen] = useState(false);
+  const [productImagePreview, setProductImagePreview] = useState('');
+
 
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isEditingProduct, setIsEditingProduct] = useState(false);
@@ -80,6 +82,7 @@ const Inventory = () => {
   const handleCreateProduct = async (e) => {
     e.preventDefault();
     const form = e.target;
+    setProductImagePreview('');
 
     try {
       await createProduct({
@@ -316,10 +319,7 @@ const Inventory = () => {
           <h2>Create Product</h2>
           <form onSubmit={handleCreateProduct}>
             <input name="name" type="text" placeholder="Product Name" required />
-            <textarea
-              name="description"
-              placeholder="Product Description"
-            ></textarea>
+            <textarea name="description" placeholder="Product Description"></textarea>
             <input
               name="basePrice"
               type="number"
@@ -327,13 +327,22 @@ const Inventory = () => {
               placeholder="Base Price"
               required
             />
-            <input name="image" type="text" placeholder="Product Image URL" />
             <input
-              name="category"
+              name="image"
               type="text"
-              placeholder="Category"
-              required
+              placeholder="Product Image URL"
+              onChange={(e) => setProductImagePreview(e.target.value)}
             />
+            {productImagePreview && (
+              <div className="sellerinv-image-preview">
+                <img
+                  src={productImagePreview}
+                  alt="Product Preview"
+                  style={{ maxWidth: '200px', marginTop: '10px' }}
+                />
+              </div>
+            )}
+            <input name="category" type="text" placeholder="Category" required />
             <label>
               <input name="listed" type="checkbox" defaultChecked={false} />
               List this product immediately?
@@ -351,13 +360,14 @@ const Inventory = () => {
         </div>
       </Modal>
 
+
       {/* --- Product Details Modal --- */}
       <Modal
         isOpen={productDetailsModalOpen}
         onRequestClose={closeProductDetailsModal}
         contentLabel="Product Details"
       >
-        <div className="sellerinv-modal-content">
+        <div className="sellerinv-product-modal">
           {selectedProduct && (
             <>
               <div className="sellerinv-modal-header">
@@ -538,6 +548,7 @@ const Inventory = () => {
           )}
         </div>
       </Modal>
+
 
       {/* --- Add Variant Modal --- */}
       <Modal

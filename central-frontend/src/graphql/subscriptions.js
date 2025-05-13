@@ -56,3 +56,24 @@ export const SUBSCRIBE_TO_ORDERS = gql`
     }
   }
 `;
+
+
+// subscription for product catalog
+export const SUBSCRIBE_TO_PRODUCTS = gql`
+  subscription GetProducts {
+    products(where: {listed: {_eq: true}}) {
+      id
+      name
+      description
+      base_price
+      image
+      category
+      sku
+      listed
+      seller_id
+      seller_username
+      created_at
+      updated_at
+    }
+  }
+`;
