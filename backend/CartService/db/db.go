@@ -13,7 +13,7 @@ var Pool *pgxpool.Pool
 func Init() {
     dbUrl := os.Getenv("DB_URL")
     if dbUrl == "" {
-        dbUrl = "postgres://postgres:password@localhost:5432/cartdb"
+        dbUrl = "postgres://postgres:password@host.docker.internal:5432/cartdb"
     }
 
     var err error

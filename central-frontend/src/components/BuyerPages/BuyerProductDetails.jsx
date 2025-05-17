@@ -3,10 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import "./style/BuyerProductDetails.css";
 import { useCart } from "../../context/CartContext";
 import { jwtDecode } from "jwt-decode";
-import { useMutation } from "@apollo/client";
+import { useMutation, useSubscription } from "@apollo/client";
 import { CREATE_ORDER } from "../../graphql/OrderMutation";
-
-
+import { SUBSCRIBE_TO_NEW_VARIANTS } from "../../graphql/subscriptions";
 
 export default function BuyerProductDetails() {
   const { id } = useParams();
@@ -15,9 +14,22 @@ export default function BuyerProductDetails() {
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const { setCartCount } = useCart();
 
+  // Subscription to new variants
+  const { data: subscriptionData } = useSubscription(SUBSCRIBE_TO_NEW_VARIANTS, {
+    variables: { productId: id },
+  });
+
+  useEffect(() => {
+    if (subscriptionData?.newVariant) {
+      setProduct((prevProduct) => ({
+        ...prevProduct,
+        product_variants: [...(prevProduct.product_variants || []), subscriptionData.newVariant],
+      }));
+    }
+  }, [subscriptionData]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -44,7 +56,7 @@ export default function BuyerProductDetails() {
       alert("This variant is out of stock!");
       return;
     }
-  
+
     // Toggle: deselect if clicking the same variant again
     if (selectedVariant && selectedVariant.id === variant.id) {
       setSelectedVariant(null);
@@ -57,13 +69,13 @@ export default function BuyerProductDetails() {
 
   const handleAddToCart = async () => {
     if (!selectedVariant || !product) return;
-  
-    const token = localStorage.getItem('token');
+
+    const token = localStorage.getItem("token");
     if (!token) return alert("You must be logged in to add to cart.");
-  
+
     const decoded = jwtDecode(token);
     const userId = decoded["https://hasura.io/jwt/claims"]?.["x-hasura-user-id"];
-  
+
     const payload = {
       user_id: parseInt(userId),
       product_id: product.id,
@@ -78,16 +90,16 @@ export default function BuyerProductDetails() {
       quantity: 1,
       image_url: selectedVariant.image,
     };
-  
+
     try {
       const res = await fetch("http://localhost:8006/cart/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-  
+
       if (!res.ok) throw new Error("Failed to add to cart");
-  
+
       // fetch updated cart for this user
       const cartRes = await fetch(`http://localhost:8006/cart/${userId}`);
       const cartItems = await cartRes.json();
@@ -121,10 +133,8 @@ export default function BuyerProductDetails() {
         sellerId: product.seller_id,
         sellerUsername: product.seller_username,
       },
-    });    
+    });
   };
-  
-  
 
   if (loading) return <p className="loading-message">Loading...</p>;
   if (error) return <p className="error-message">{error}</p>;
@@ -135,7 +145,7 @@ export default function BuyerProductDetails() {
     ...(product.product_variants || []).map((variant) => ({
       src: variant.image,
       alt: variant.variant_name,
-    }))
+    })),
   ];
 
   return (
@@ -160,7 +170,7 @@ export default function BuyerProductDetails() {
                 key={idx}
                 src={img.src}
                 alt={img.alt}
-                className={`thumbnail ${selectedImage?.src === img.src ? 'active' : ''}`}
+                className={`thumbnail ${selectedImage?.src === img.src ? "active" : ""}`}
                 onClick={() => setSelectedImage(img)}
               />
             ))}
@@ -187,14 +197,20 @@ export default function BuyerProductDetails() {
                   <div
                     key={variant.id}
                     className={`variant-card 
-                      ${variant.stock_quantity === 0 ? 'out-of-stock' : ''}
-                      ${selectedVariant?.id === variant.id ? 'selected' : ''}
+                      ${variant.stock_quantity === 0 ? "out-of-stock" : ""}
+                      ${selectedVariant?.id === variant.id ? "selected" : ""}
                     `}
                     onClick={() => handleVariantSelect(variant)}
-                    style={{ cursor: variant.stock_quantity === 0 ? 'not-allowed' : 'pointer' }}
+                    style={{
+                      cursor: variant.stock_quantity === 0 ? "not-allowed" : "pointer",
+                    }}
                   >
-                    <p><strong>Size:</strong> {variant.size}</p>
-                    <p><strong>Color:</strong> {variant.color}</p>
+                    <p>
+                      <strong>Size:</strong> {variant.size}
+                    </p>
+                    <p>
+                      <strong>Color:</strong> {variant.color}
+                    </p>
                   </div>
                 ))}
               </div>

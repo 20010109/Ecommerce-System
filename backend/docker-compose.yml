@@ -42,6 +42,11 @@ services:
     depends_on:
       - rabbitmq
 
+  cart-service:
+    build: ./CartService
+    ports:
+      - "8006:8006"
+
   inventory-service:
     build: ./InventoryService
     ports:
